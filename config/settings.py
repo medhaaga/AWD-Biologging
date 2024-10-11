@@ -34,6 +34,7 @@ COLLAPSE_BEHAVIORS_MAPPING = {'Lying (head up)': 'Vigilant',
                                     'Drinking': 'Other',
                                     'Dig': 'Other',
                                     'Capture?': 'Other',
+                                    'Eating': 'Feeding',
                                     }
 
-BEHAVIORS = ['Eating', 'Resting', 'Moving', 'Running', 'Vigilant']
+BEHAVIORS = ['Feeding', 'Resting', 'Moving', 'Running', 'Vigilant']

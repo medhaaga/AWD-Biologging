@@ -99,7 +99,8 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
 
     # Get the directory to save the online predictions
     save_dir = get_online_pred_path(os.path.basename(acc_file_path).split('.')[0])
-    save_dir = os.path.join(save_dir, f'window_length_{window_length}')
+    smoothening_window_len = smoothening_config['smoothening_window_length']
+    save_dir = os.path.join(save_dir, f'window_length_{smoothening_window_len}')
     os.makedirs(save_dir, exist_ok=True)
 
     if save_objects:
@@ -264,17 +265,17 @@ if __name__ == '__main__':
                           'score_hop_length': args.score_hop_length
                           }
 
-    # random_halfday_online_eval(model_config=model_config, 
-    #                            dog=args.dog, 
-    #                            window_duration=args.window_duration, 
-    #                            window_length=args.window_length, 
-    #                            smoothening_config=smoothening_config, 
-    #                            save_objects=True, 
-    #                            plot=True)
+    random_halfday_online_eval(model_config=model_config, 
+                               dog=args.dog, 
+                               window_duration=args.window_duration, 
+                               window_length=args.window_length, 
+                               smoothening_config=smoothening_config, 
+                               save_objects=True, 
+                               plot=True)
 
     # all_online_eval(model_config, device, sampling_frequency=SAMPLING_RATE, window_length=None, window_duration=args.window_duration)
-    extract_running_events()
-    extract_eating_events()
+    # extract_running_events()
+    # extract_eating_events()
 
 
 

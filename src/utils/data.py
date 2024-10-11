@@ -167,13 +167,13 @@ def adjust_behavior_and_durations(df, collapse_behavior_mapping, behaviors):
     df = df[df['duration'] >= 1]
 
     # running from video lables of duration lesser than 8 sec are unreliable
-    idx = [(df['behavior'].isin(['Running', 'Eating', 'Moving'])) & (df['duration'] < 8) & (df['Source'] == 'Video')][0]
+    idx = [(df['behavior'].isin(['Running', 'Feeding', 'Moving'])) & (df['duration'] < 8) & (df['Source'] == 'Video')][0]
     df = df[~idx]
 
     return df
 
 def create_data_tensors(acc_data, collapse_behavior_mapping, behaviors, sampling_rate, 
-                        padding='repeat', reuse_behaviors=['Eating', 'Running', 'Moving'], min_duration=1.0, duration_percentile=50):
+                        padding='repeat', reuse_behaviors=[], min_duration=1.0, duration_percentile=50):
     """
     Create data tensors from acceleration data with given parameters.
 
@@ -315,7 +315,7 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, args):
     return df_train, df_test
 
 
-def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, behaviors, args, reuse_behaviors=['Eating', 'Moving', 'Running']):
+def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, behaviors, args, reuse_behaviors=[]):
 
     """
     Arguments

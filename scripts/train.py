@@ -71,7 +71,7 @@ def parse_arguments():
     parser.add_argument("--cutoff_frequency", type=float, default=0)
     parser.add_argument("--cutoff_order", type=int, default=5)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--theta", type=float, default=0.8)
+    parser.add_argument("--theta", type=float, default=0.7)
     parser.add_argument("--match", type=int, default=0, help="should the matching be done or use pre-matched observations?")
     parser.add_argument("--min_duration", type=float, default=1.0, help="minimum duration of a behavior in seconds so that it is not discarded")
     parser.add_argument("--create_class_imbalance", type=int, default=0, help="whether to create class imbalance artificially")
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                                                                                                     COLLAPSE_BEHAVIORS_MAPPING, 
                                                                                                     BEHAVIORS, 
                                                                                                     args, 
-                                                                                                    reuse_behaviors=['Eating', 'Moving', 'Running']) 
+                                                                                                    reuse_behaviors=BEHAVIORS) 
     
     
     if args.create_class_imbalance:
@@ -263,6 +263,7 @@ if __name__ == '__main__':
     ###### Fit the conformal model
     ##############################################
 
+    model = torch.load(os.path.join(dir, 'model.pt'))
     cdataloader = DataLoader(TensorDataset(torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val)), batch_size=args.batch_size, shuffle=False)
     cmodel = ConformalModel(model, cdataloader, alpha=0.1, lamda_criterion='size').to(device)
     torch.save(cmodel, os.path.join(dir, 'cmodel.pt'))

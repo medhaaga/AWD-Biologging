@@ -198,7 +198,7 @@ def repeat_or_truncate_list(lst, fixed_length, reuse=False, min_length=16):
 
     else:
         if len(lst) < fixed_length:
-                # Pad the list with 0 if it's shorter than fixed_length
+                # Repeat the list if it's shorter than fixed_length
                 lst = lst*(fixed_length//len(lst)) 
                 return [lst + lst[:(fixed_length - len(lst))]]
 
@@ -225,7 +225,7 @@ def pad_or_truncate_list(lst, fixed_length):
         # Truncate the list if it's longer than fixed_length
         return lst[len(lst)-fixed_length:]
 
-def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_behaviors=[], min_duration=2):
+def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_behaviors=[], min_duration=1.0):
         
     """Load the dataset and make the acc sequence along x, y, z of fixed length.
 
