@@ -33,11 +33,11 @@ def get_results_dir():
     path = os.path.join(current_path, 'results')
     return path
 
-def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta):
+def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):
     results_dir = get_results_dir()
     levels = ['predictions', exp_name, 'conv_layers_'+str(n_CNNlayers), \
              'n_channels_'+str(n_channels), 'kernel_size_'+str(kernel_size), \
-             'theta_'+str(theta)]
+             'theta_'+str(theta), 'duration_'+str(window_duration_percentile)]
     return get_path(levels, results_dir)
 
 def get_online_pred_path(halfday):

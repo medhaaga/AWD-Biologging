@@ -3,6 +3,7 @@ import os
 import sys
 import argparse
 import warnings
+import random as random
 sys.path.append('.')
 sys.path.append('../')
 
@@ -22,10 +23,14 @@ from config.settings import (SAMPLING_RATE,
                              AWD_VECTRONICS_PATHS,
                              VECTRONICS_METADATA_PATH,
                              BEHAVIORS,
-                             VECTRONICS_BEHAVIOR_EVAL_PATH)
+                             VECTRONICS_BEHAVIOR_EVAL_PATH,
+                             COLLAPSE_BEHAVIORS_MAPPING)
 
 from src.utils.io import (get_results_path,
-                          get_online_pred_path)
+                          get_online_pred_path,
+                          get_matched_data_path)
+
+from src.utils.data import (adjust_behavior_and_durations)
 
 from src.utils.plot import (plot_signal_and_online_predictions)
 
@@ -35,6 +40,7 @@ from src.utils.plot import (plot_signal_and_online_predictions)
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--window_duration", type=float, default=12.937)
+    parser.add_argument("--window_duration_percentile", type=float, default=50)
     parser.add_argument("--window_length", type=int, default=206)
     parser.add_argument("--score_hop_length", type=int, default=None)
     parser.add_argument("--smoothening_window_length", type=int, default=10)
@@ -44,7 +50,7 @@ def parse_arguments():
     parser.add_argument("--kernel_size", type=int, default=5, help="size fo kernel for CNN")
     parser.add_argument("--n_channels", type=int, default=32, help="number of output channels for the first CNN layer")
     parser.add_argument("--n_CNNlayers", type=int, default=5, help="number of convolution layers")
-    parser.add_argument("--theta", type=float, default=0.7)
+    parser.add_argument("--theta", type=float, default=0.9)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--dog", type=str, default='jessie', choices=['jessie', 'ash', 'palus', 'green', 'fossey'])
 
@@ -55,11 +61,13 @@ def parse_arguments():
 def halfday_online_eval(csv_path, model_dir, window_duration, window_length, smoothening_config):
 
     acc_data = pd.read_csv(csv_path)
+    acc_data['Timestamp'] = pd.to_datetime(acc_data['Timestamp'], format='%Y-%m-%d %H:%M:%S.%f')
+    acc_data.sort_values(by='Timestamp', inplace=True)
     signal = torch.tensor(np.array([acc_data['Acc X [g]'].values, acc_data['Acc Y [g]'].values, acc_data['Acc Z [g]'].values])).float().unsqueeze(0)
     scores = online_score_evaluation(model_dir=model_dir, X=signal, window_duration=window_duration, window_length=window_length, hop_length=smoothening_config['score_hop_length'], sampling_frequency=SAMPLING_RATE)
     online_avg = online_smoothening(scores, smoothening_config['smoothening_window_length'], smoothening_config['smoothening_hop_length'])
 
-    return signal, scores, online_avg
+    return acc_data['Timestamp'].values, signal, scores, online_avg
     
 
 def random_halfday_online_eval(model_config, dog, window_duration, window_length, smoothening_config, save_objects=True, plot=True):
@@ -84,18 +92,26 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
     """
 
     model_dir = get_results_path(
-        model_config['experiment_name'], 
-        model_config['n_CNNlayers'], 
-        model_config['n_channels'], 
-        model_config['kernel_size'], 
-        model_config['theta']
+        exp_name=model_config['experiment_name'], 
+        n_CNNlayers=model_config['n_CNNlayers'], 
+        n_channels=model_config['n_channels'], 
+        kernel_size=model_config['kernel_size'], 
+        theta=model_config['theta'],
+        window_duration_percentile=model_config['window_duration_percentile']
     )
     acc_dir = os.path.join(AWD_VECTRONICS_PATHS[dog], 'combined_acc')
-    acc_files = [os.path.join(acc_dir, file) for file in os.listdir(acc_dir) if file.endswith('.csv')]
-    acc_file_path = acc_files[np.random.randint(len(acc_files))]
+    matched_acc_data = pd.read_csv(get_matched_data_path())
+    matched_acc_data = adjust_behavior_and_durations(matched_acc_data, COLLAPSE_BEHAVIORS_MAPPING, BEHAVIORS)
+
+    half_day = random.choice(matched_acc_data[(matched_acc_data['dog ID'] == dog)]['half day [yyyy-mm-dd_am/pm]'].values)
+    acc_file_path = os.path.join(acc_dir, dog + '_' + half_day + '.csv')
+
+    half_day_behaviors = matched_acc_data[(matched_acc_data['dog ID'] == dog) & (matched_acc_data['half day [yyyy-mm-dd_am/pm]'] == half_day)]
+    half_day_behaviors.loc[:, 'behavior_start'] = pd.to_datetime(half_day_behaviors['behavior_start'])
+    half_day_behaviors.loc[:, 'behavior_end'] = pd.to_datetime(half_day_behaviors['behavior_end'])
 
     # Perform half-day online evaluation
-    signal, scores, online_avg = halfday_online_eval(acc_file_path, model_dir, window_duration, window_length, smoothening_config)
+    time, signal, scores, online_avg = halfday_online_eval(acc_file_path, model_dir, window_duration, window_length, smoothening_config)
 
     # Get the directory to save the online predictions
     save_dir = get_online_pred_path(os.path.basename(acc_file_path).split('.')[0])
@@ -108,12 +124,14 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
         np.save(os.path.join(save_dir, 'scores.npy'), scores)
         np.save(os.path.join(save_dir, 'online_avg.npy'), online_avg)
 
+
     if plot:
 
         label_encoder = LabelEncoder()
         label_encoder.fit(BEHAVIORS)
 
         plot_signal_and_online_predictions(
+            time,
             signal, 
             online_avg, 
             smoothening_config['smoothening_window_length'], 
@@ -121,7 +139,8 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
             window_duration, 
             label_encoder, 
             sampling_rate=SAMPLING_RATE, 
-            plot_dir=save_dir
+            plot_dir=save_dir,
+            half_day_behaviors=half_day_behaviors
         )
 
     return signal, scores, online_avg
@@ -250,6 +269,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device(f"cuda:{args.device}" if torch.cuda.is_available() else "cpu")
     np.random.seed(seed=args.seed)
+    random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
 
@@ -257,7 +277,8 @@ if __name__ == '__main__':
                     'n_CNNlayers': args.n_CNNlayers,
                     'n_channels': args.n_channels,
                     'kernel_size': args.kernel_size,
-                    'theta': args.theta
+                    'theta': args.theta,
+                    'window_duration_percentile': args.window_duration_percentile
                     }
 
     smoothening_config = {'smoothening_window_length': args.smoothening_window_length,

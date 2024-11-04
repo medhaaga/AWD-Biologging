@@ -57,7 +57,7 @@ def parse_arguments():
     parser.add_argument("--kernel_size", type=int, default=5, help="size fo kernel for CNN")
     parser.add_argument("--n_channels", type=int, default=32, help="number of output channels for the first CNN layer")
     parser.add_argument("--n_CNNlayers", type=int, default=5, help="number of convolution layers")
-    parser.add_argument("--duration_percentile", type=int, default=50, help="audio duration cutoff percentile")
+    parser.add_argument("--window_duration_percentile", type=int, default=50, help="audio duration cutoff percentile")
     parser.add_argument("--num_epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--learning_rate", type=float, default=.0001)
@@ -71,7 +71,7 @@ def parse_arguments():
     parser.add_argument("--cutoff_frequency", type=float, default=0)
     parser.add_argument("--cutoff_order", type=int, default=5)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--theta", type=float, default=0.7)
+    parser.add_argument("--theta", type=float, default=0.9)
     parser.add_argument("--match", type=int, default=0, help="should the matching be done or use pre-matched observations?")
     parser.add_argument("--min_duration", type=float, default=1.0, help="minimum duration of a behavior in seconds so that it is not discarded")
     parser.add_argument("--create_class_imbalance", type=int, default=0, help="whether to create class imbalance artificially")
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     torch.cuda.manual_seed(args.seed)
 
     # experiment directory 
-    dir = get_results_path(args.experiment_name, args.n_CNNlayers, args.n_channels, args.kernel_size, args.theta)
+    dir = get_results_path(args.experiment_name, args.n_CNNlayers, args.n_channels, args.kernel_size, args.theta, args.window_duration_percentile)
     os.makedirs(dir, exist_ok=True)
 
     # train-test split profile

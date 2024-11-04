@@ -1,8 +1,11 @@
 import numpy as np
+import pandas as pd
 import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+from matplotlib.lines import Line2D
+
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score, precision_score, recall_score, f1_score
 
 # Graphing Parameters
@@ -207,12 +210,13 @@ def plot_online_predictions(online_avg, window_length, hope_length, window_durat
 
 
 
-def plot_signal_and_online_predictions(signal, online_avg, window_length, hop_length, window_duration, label_encoder, sampling_rate=16, plot_dir=None):
+def plot_signal_and_online_predictions(time, signal, online_avg, window_length, hop_length, window_duration, label_encoder, sampling_rate=16, plot_dir=None, half_day_behaviors=None):
     """
     Plots the raw signal and the online predictions.
 
     Parameters:
     ---------------
+    - time: time stamps of the signal (1D array).
     - signal: The raw signal data (1D array).
     - online_avg: The average online prediction probabilities (2D array).
     - window_length: Length of each window for smoothening.
@@ -254,15 +258,29 @@ def plot_signal_and_online_predictions(signal, online_avg, window_length, hop_le
 
     # Plot the signal
     signal_x = signal[0,0,:]
-    ax_signal.plot(np.arange(0, len(signal_x)) / (sampling_rate*3600), signal_x, color='#15316A', linewidth=1)
+    ax_signal.plot(time, signal_x, color='#15316A', linewidth=1)
     ax_signal.set_xlabel('Time (h)')
     ax_signal.set_ylabel("Amplitude (g)")
     ax_signal.set_title("Raw Signal along X axis")
 
+    # Plot behaviors
+    if half_day_behaviors is not None:
+        color_palette = ['green', 'hotpink', 'gray', 'brown', 'powderblue']
+        alphas = [1, 0.8, 0.2, 1, 0.4]
+        for i in range(len(half_day_behaviors)):
+            behavior_idx = label_encoder.transform([half_day_behaviors.iloc[i]['behavior']]).item()
+            ax_signal.axvspan(half_day_behaviors.iloc[i]['behavior_start'], 
+                              half_day_behaviors.iloc[i]['behavior_end'], 
+                              color=color_palette[behavior_idx], 
+                              alpha=alphas[behavior_idx])
+    legend_handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=color_palette[i], markersize=10, label=label_encoder.classes_[i])
+                  for i in range(len(label_encoder.classes_))]
+    ax_signal.legend(handles=legend_handles, loc='upper right', bbox_to_anchor=(1.26, 1.14), fontsize=25)
+
+
     # Plot the online predictions
     scatter = ax_online.scatter(X_flat, Y_flat, c=color_flat, cmap='Blues', s=140, marker='s', alpha=0.7)
     ax_online.set_xlabel("Time (h)")
-    # ax_online.set_ylabel("Behavior")
     ax_online.set_yticks(y)
     ax_online.set_yticklabels(y_labels)
     ax_online.set_ylim(-1, len(y))
