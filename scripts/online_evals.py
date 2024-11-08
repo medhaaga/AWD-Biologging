@@ -86,6 +86,7 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
 
     Returns:
     ---------------------------
+    
     - signal: numpy.ndarray = The raw signal data.
     - scores: numpy.ndarray = The scores computed by the model.
     - online_avg: numpy.ndarray = The online average prediction probabilities.
@@ -103,7 +104,8 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
     matched_acc_data = pd.read_csv(get_matched_data_path())
     matched_acc_data = adjust_behavior_and_durations(matched_acc_data, COLLAPSE_BEHAVIORS_MAPPING, BEHAVIORS)
 
-    half_day = random.choice(matched_acc_data[(matched_acc_data['dog ID'] == dog)]['half day [yyyy-mm-dd_am/pm]'].values)
+    # half_day = random.choice(matched_acc_data[(matched_acc_data['dog ID'] == dog)]['half day [yyyy-mm-dd_am/pm]'].values)
+    half_day = '2021-09-11_am'
     acc_file_path = os.path.join(acc_dir, dog + '_' + half_day + '.csv')
 
     half_day_behaviors = matched_acc_data[(matched_acc_data['dog ID'] == dog) & (matched_acc_data['half day [yyyy-mm-dd_am/pm]'] == half_day)]
