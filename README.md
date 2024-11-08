@@ -1,4 +1,4 @@
-# Machine learning Pipeline for African Wild Dogs Biologging
+# AI Pipeline for African Wild Dogs Biologging
 
 
 ## Dependencies & Quickstart
