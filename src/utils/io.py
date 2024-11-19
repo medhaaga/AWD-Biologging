@@ -59,4 +59,4 @@ def format_time(elapsed):
     return str(datetime.timedelta(seconds=elapsed_rounded))
 
 if __name__ == '__main__':
-    print(get_results_path('no_split', 5, 32, 5, 0.0))
+    print(get_results_path('no_split', 5, 32, 5, 0.0, 50))
