@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from scipy.signal import butter, filtfilt
 
-def combined_annotations(path, id_mapping):
+def combined_annotations(video_path, audio_path, id_mapping):
 
     """Combine the annotations from gold and silver labels.
     
@@ -20,11 +20,8 @@ def combined_annotations(path, id_mapping):
     all_annotations: Pandas dataframe = dataframe of all annotations with time stamps
 
     """
-
-    annotations_dir = os.path.join(os.path.dirname(path['jessie']), 'annotations_combined.csv')
-    audio_annotations_dir = os.path.join(os.path.dirname(path['jessie']), 'silver_labels_annotations.csv')
-    video_annotations = pd.read_csv(annotations_dir) # load video annotations
-    audio_annotations = pd.read_csv(audio_annotations_dir) # load audio annotations
+    video_annotations = pd.read_csv(video_path) # load video annotations
+    audio_annotations = pd.read_csv(audio_path) # load audio annotations
 
     video_annotations['id'] = video_annotations['id'].replace(id_mapping)
     audio_annotations['Individual'] = audio_annotations['Individual'].replace(id_mapping)

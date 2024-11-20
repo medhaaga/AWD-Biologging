@@ -35,6 +35,7 @@ def get_results_dir():
 
 def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):
     results_dir = get_results_dir()
+    os.makedirs(results_dir, exist_ok=True)
     levels = ['predictions', exp_name, 'conv_layers_'+str(n_CNNlayers), \
              'n_channels_'+str(n_channels), 'kernel_size_'+str(kernel_size), \
              'theta_'+str(theta), 'duration_'+str(window_duration_percentile)]
@@ -57,6 +58,23 @@ def format_time(elapsed):
 
     # Format as hh:mm:ss
     return str(datetime.timedelta(seconds=elapsed_rounded))
+
+# to be used when annotations and metadata are save locally in project repo
+
+def get_metadata_path():
+    current_path = get_project_root()
+    path = os.path.join(current_path, 'data/metadata.csv')
+    return path
+
+def get_video_annotations_path():
+    current_path = get_project_root()
+    path = os.path.join(current_path, 'data/annotations_combined.csv')
+    return path
+    
+def get_audio_annotations_path():
+    current_path = get_project_root()
+    path = os.path.join(current_path, 'data/silver_labels_annotations.csv')
+    return path
 
 if __name__ == '__main__':
     print(get_results_path('no_split', 5, 32, 5, 0.0, 50))

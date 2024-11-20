@@ -26,7 +26,10 @@ from src.utils.train import (training_loop,
                              multi_label_eval_loop)
 
 from src.utils.io import (format_time,
-                          get_results_path)
+                          get_results_path,
+                          get_metadata_path,
+                          get_video_annotations_path,
+                          get_audio_annotations_path)
 
 from src.methods.prediction_model import create_dynamic_conv_model
 
@@ -38,7 +41,8 @@ from src.utils.data import (setup_data_objects,
 from src.data_prep.data_prep_utils import combined_annotations
 
 from config.settings import (VECTRONICS_METADATA_PATH,
-                             AWD_VECTRONICS_PATHS,
+                             VECTRONICS_VIDEO_ANNOTATIONS_PATH,
+                             VECTRONICS_AUDIO_ANNOTATIONS_PATH,
                              id_mapping,
                              COLLAPSE_BEHAVIORS_MAPPING,
                              BEHAVIORS)
@@ -102,8 +106,24 @@ if __name__ == '__main__':
     # loading data and creating train/test split
     ##############################################
 
-    metadata = pd.read_csv(VECTRONICS_METADATA_PATH) # load metadata
-    all_annotations = combined_annotations(AWD_VECTRONICS_PATHS, id_mapping) # load annotations 
+    if os.path.exists(VECTRONICS_METADATA_PATH):
+        metadata = pd.read_csv(VECTRONICS_METADATA_PATH) # load metadata
+    elif os.path.exists(get_metadata_path()):
+        metadata = pd.read_csv(get_metadata_path()) # load metadata
+    else:
+        raise FileNotFoundError("The metadata not found.")
+
+    if os.path.exists(VECTRONICS_VIDEO_ANNOTATIONS_PATH) and os.path.exists(VECTRONICS_AUDIO_ANNOTATIONS_PATH):
+        all_annotations = combined_annotations(video_path=VECTRONICS_VIDEO_ANNOTATIONS_PATH, 
+                                            audio_path=VECTRONICS_AUDIO_ANNOTATIONS_PATH,
+                                            id_mapping=id_mapping) # load annotations 
+    elif os.path.exists(get_video_annotations_path()) and os.path.exists(get_audio_annotations_path()):
+        all_annotations = combined_annotations(video_path=get_video_annotations_path(), 
+                                            audio_path=get_audio_annotations_path(),
+                                            id_mapping=id_mapping) # load annotations 
+    else:
+        raise FileNotFoundError("The annottaions not found.")
+
 
     start = time.time()
     X_train, y_train, z_train, X_val, y_val, z_val, X_test, y_test, z_test, _ = setup_data_objects(metadata, 
