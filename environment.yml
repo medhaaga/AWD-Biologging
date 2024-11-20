@@ -1,16 +1,18 @@
 name: wildlife
 channels:
   - defaults
+  - nvidia
+  - pytorch
 dependencies:
-  - python=3.11
+  - python=3.11q
   - pandas
   - numpy
   - scikit-learn
   - ipykernel
   - tqdm
   - torchaudio
-  - pytorch-cuda=12.1
+  # - pytorch-cuda=12.1 # Uncomment if compatible GPU is available
+  - pytorch # Comment if compatible GPU is available
   - torchvision
-  - pytorch
   - seaborn
 prefix: /home/medhaaga/miniconda3/envs/wildlife

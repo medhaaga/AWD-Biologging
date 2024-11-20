@@ -328,19 +328,25 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, beh
     match: bool = whether to match behaviors or use a pre-matched dataframe
 
     """
-
+    t1 = time.time()
     if args.match:
-        print('Macthing acceleration-behavior pairs...')
+        print('Matching acceleration-behavior pairs...')
         df_train, df_test = match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, behaviors, args)
     else:
         print('Using pre-matched acceleration-behavior pairs...')
         df_train, df_test = load_matched_train_test_df(collapse_behavior_mapping, behaviors, args)
 
+    print("")
+    print("==================================")
+    print(f"Matching annotations to acceleration snippets takes {time.time() - t1:3f} seconds")
+
+    t2 = time.time()
     # fix sequence max length and truncate/pad data to create X, y, and z.
     max_acc_duration = np.percentile(np.concatenate((df_train['duration'].values, df_test['duration'].values), axis=0), args.window_duration_percentile)
     max_steps = int(max_acc_duration*SAMPLING_RATE)
     X, y, z = create_padded_or_truncated_data(df_train, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
     X_test, y_test, z_test = create_padded_or_truncated_data(df_test, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
+    print(f"Creating fixed-duration windows takes {time.time() - t2:3f} seconds.")
 
     print("")
     print("==================================")
