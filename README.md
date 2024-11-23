@@ -7,6 +7,11 @@ The code uses Python version 3.11. The required Python packages can be installed
 conda env create -f environment.yml
 conda activate wildlife
 ```
+
+Next, please install PyTorch following the installation instructions for your particular CUDA distribution. For example, for CUDA 11.8, run:
+```
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
 Make sure you have [Miniconda](https://docs.anaconda.com/miniconda/miniconda-install/) installed to create and manage Conda environments.
 **Hardware Recommendation:** We recommend using a machine with:
 - At least 32 GB of CPU RAM.
