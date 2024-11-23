@@ -28,8 +28,8 @@ from src.utils.train import (training_loop,
 from src.utils.io import (format_time,
                           get_results_path,
                           get_metadata_path,
-                          get_video_annotations_path,
-                          get_audio_annotations_path)
+                          get_video_labels_path,
+                          get_audio_labels_path)
 
 from src.methods.prediction_model import create_dynamic_conv_model
 
@@ -117,9 +117,9 @@ if __name__ == '__main__':
         all_annotations = combined_annotations(video_path=VECTRONICS_VIDEO_ANNOTATIONS_PATH, 
                                             audio_path=VECTRONICS_AUDIO_ANNOTATIONS_PATH,
                                             id_mapping=id_mapping) # load annotations 
-    elif os.path.exists(get_video_annotations_path()) and os.path.exists(get_audio_annotations_path()):
-        all_annotations = combined_annotations(video_path=get_video_annotations_path(), 
-                                            audio_path=get_audio_annotations_path(),
+    elif os.path.exists(get_video_labels_path()) and os.path.exists(get_audio_labels_path()):
+        all_annotations = combined_annotations(video_path=get_video_labels_path(), 
+                                            audio_path=get_audio_labels_path(),
                                             id_mapping=id_mapping) # load annotations 
     else:
         raise FileNotFoundError("The annottaions not found.")

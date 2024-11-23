@@ -28,6 +28,21 @@ def get_matched_summary_path():
     path = os.path.join(current_path, 'data/matched_acc_summary.csv')
     return path
 
+def get_metadata_path():
+    current_path = get_project_root()
+    path = os.path.join(current_path, 'data/metadata.csv')
+    return path
+
+def get_video_labels_path():
+    current_path = get_project_root()
+    path = os.path.join(current_path, 'data/video_labels.csv')
+    return path
+
+def get_audio_labels_path():
+    current_path = get_project_root()
+    path = os.path.join(current_path, 'data/audio_labels.csv')
+    return path
+
 def get_results_dir():
     current_path = get_project_root()
     path = os.path.join(current_path, 'results')
@@ -59,22 +74,6 @@ def format_time(elapsed):
     # Format as hh:mm:ss
     return str(datetime.timedelta(seconds=elapsed_rounded))
 
-# to be used when annotations and metadata are save locally in project repo
-
-def get_metadata_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/metadata.csv')
-    return path
-
-def get_video_annotations_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/annotations_combined.csv')
-    return path
-    
-def get_audio_annotations_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/silver_labels_annotations.csv')
-    return path
 
 if __name__ == '__main__':
     print(get_results_path('no_split', 5, 32, 5, 0.0, 50))

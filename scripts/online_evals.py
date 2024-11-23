@@ -1,3 +1,9 @@
+###########################################################
+### This script requires access to raw accelerometery data
+### Adjust paths accordingly for using your data
+###########################################################
+
+
 # System & OS
 import os
 import sys
