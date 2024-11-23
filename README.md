@@ -41,7 +41,12 @@ Additional parameters, such as the prediction model architecture (e.g., number o
 
 ## Reproducing Results
 
-The figures and tables from the main text can be reproduced by running the four notebooks - `no_split.ipynb`, `interdog.ipynb`, `interyear.ipynb`, and `interAMPM.ipynb` for the four experimental setups. 
+To reproduce the hyperparameter tuning plots `no_split` experiment, use the following command to run all training configurations.
+```
+bash scripts/no_split.sh
+```
+
+Replace `no_split` with the experiment of choice. The figures and tables from the main text can be reproduced by running the four notebooks - `no_split.ipynb`, `interdog.ipynb`, `interyear.ipynb`, and `interAMPM.ipynb` for the four experimental setups. 
 
 ## Dependencies & Quickstart
 The code uses Python version 3.11. The required Python packages can be installed by setting up the conda environment as follows.
