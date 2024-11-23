@@ -1,4 +1,4 @@
-# AI Pipeline for African Wild Dogs Biologging
+# Leveraging machine learning and accelerometry to classify animal behaviours with uncertainty 
 
 ## Abstract
 
