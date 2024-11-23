@@ -150,7 +150,7 @@ def give_balanced_weights(theta, y):
     weights = theta*np.ones(n_classes)/n_classes + (1-theta)*np.unique(y, return_counts=True)[1]/len(y)
     return weights
 
-def adjust_behavior_and_durations(df, collapse_behavior_mapping, behaviors):
+def adjust_behavior_and_durations(df, collapse_behavior_mapping, behaviors, verbose=False):
 
     """
         1. Collapse behaviors to coarser classes.
@@ -159,16 +159,26 @@ def adjust_behavior_and_durations(df, collapse_behavior_mapping, behaviors):
         4. remove running, moving, eatng, and marking behaviors shorter than 8 sec
     """
 
+    if verbose:
+        duration_before_filter = df.duration.sum()
+        print(f'Total behavior duration before filtering - {duration_before_filter/3600}')  
+
     # collapse classes
     df['behavior'] = df['behavior'].replace(collapse_behavior_mapping) # collapse behaviors
     df = df[df['behavior'].isin(behaviors)]
 
-    # remove very short behaviors
-    df = df[df['duration'] >= 1]
+    if verbose:
+        duration_sum = df.duration.sum()
+        print(f'Total duration after filtering out chosen behaviors is {duration_sum/3600} hrs.')
 
-    # running from video lables of duration lesser than 8 sec are unreliable
-    idx = [(df['behavior'].isin(['Running', 'Feeding', 'Moving'])) & (df['duration'] < 8) & (df['Source'] == 'Video')][0]
+    # filtration
+    df = df[df['duration'] >= 1]
+    idx = [(df['behavior'].isin(['Running', 'Feeding', 'Moving'])) & (df['duration'] < 8) & (df['Source'] == 'Video')][0] # running from video lables of duration lesser than 8 sec are unreliable
     df = df[~idx]
+
+    if verbose:
+        duration_sum = df.duration.sum()
+        print(f'Total behavior duration after filtering is {duration_sum/3600} hrs.')
 
     return df
 
