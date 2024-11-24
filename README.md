@@ -1,4 +1,4 @@
-# Leveraging machine learning and accelerometry to classify animal behaviours with uncertainty 
+# Leveraging machine learning and accelerometry to classify animal behaviors with uncertainty 
 
 ## Abstract
 
@@ -7,7 +7,7 @@ Our approach integrates convolutional neural nets-based machine learning archite
 
 ## Experiment Setups and Results
 
-The experiment setups differ in their train-test splits chosen specifically so that the train and test data satisfy use-specified controls. For example, the experiment setup with AWD *green* in test set and remaining dogs in the train set is called *interdog*. These filteres for train and test set can be specified by modifying the `get_exp_filter_profiles` function in `src/utils/data.py`. The filter profile received from the function is used to obtain the filtered dataframes using `filter_data` method in `src/data_prep/data_prep_utils.py`.
+The experiment setups differ in their train-test splits chosen specifically so that the train and test data satisfy use-specified controls. For example, the experiment setup with AWD *green* in the test set and the remaining dogs in the train set is called *interdog*. These filters for train and test set can be specified by modifying the `get_exp_filter_profiles` function in `src/utils/data.py`. The filter profile received from the function is used to obtain the filtered dataframes using `filter_data` method in `src/data_prep/data_prep_utils.py`.
 
 We use the following four experiment setups.
 
@@ -28,7 +28,7 @@ The split details for each experimental setup are:
 
 ## Training
 
-To train the classification model, including both the prediction and conformal models, for a predefined experiment setup which specifies the train and test split, use the following command:
+To train the classification model, including both the prediction and conformal models, for a predefined experiment setup that specifies the train and test split, use the following command:
 ```
 python scripts/train.py --experiment_name <experiment_name> --window_duration_percentile <window_duration_percentile> --alpha <alpha>
 ```
@@ -55,7 +55,7 @@ conda env create -f environment.yml
 conda activate wildlife
 ```
 
-Next, please install PyTorch following the installation instructions for your particular CUDA distribution. For example, for CUDA 11.8, run:
+Next, please install PyTorch following the [installation instructions](https://pytorch.org/get-started/locally/) for your particular CUDA distribution. For example, for CUDA 11.8, run:
 ```
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
