@@ -1,4 +1,5 @@
 import pytz
+# GLOBAL VARIABLES 
 
 # These global variables should be modified based on the path and structure of your data.
 
@@ -9,7 +10,6 @@ AWD_VECTRONICS_PATHS = {'jessie': "/mnt/ssd/medhaaga/wildlife/Vectronics/2022_44
  'palus': "/mnt/ssd/medhaaga/wildlife/Vectronics/2021_44910_Aqua_Palus",
  'ash': "/mnt/ssd/medhaaga/wildlife/Vectronics/2021_44904_Ninja_Ash",
  'fossey': '/mnt/ssd/medhaaga/wildlife/Vectronics/2022_44907_Aqua_Fossey'}
-
 
 VECTRONICS_METADATA_PATH = "/mnt/ssd/medhaaga/wildlife/Vectronics/metadata.csv"
 VECTRONICS_VIDEO_ANNOTATIONS_PATH = "/mnt/ssd/medhaaga/wildlife/Vectronics/annotations_combined.csv"
