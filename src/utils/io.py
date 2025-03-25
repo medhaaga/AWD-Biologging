@@ -14,38 +14,45 @@ def get_path(levels, main_dir):
     return path
 
 def get_matched_data_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/matched_acc_data.csv')
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'matched_acc_data.csv')
     return path
 
 def get_matched_metadata_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/matched_acc_metadata.csv')
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'matched_acc_metadata.csv')
     return path
 
 def get_matched_summary_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/matched_acc_summary.csv')
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'matched_acc_summary.csv')
     return path
 
 def get_metadata_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/metadata.csv')
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'metadata.csv')
     return path
 
 def get_video_labels_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/video_labels.csv')
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'video_labels.csv')
     return path
 
 def get_audio_labels_path():
-    current_path = get_project_root()
-    path = os.path.join(current_path, 'data/audio_labels.csv')
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'audio_labels.csv')
     return path
 
 def get_results_dir():
     current_path = get_project_root()
     path = os.path.join(current_path, 'results')
+    os.makedirs(path, exist_ok=True)
     return path
 
 def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):

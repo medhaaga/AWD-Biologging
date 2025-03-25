@@ -111,7 +111,7 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
     matched_acc_data = adjust_behavior_and_durations(matched_acc_data, COLLAPSE_BEHAVIORS_MAPPING, BEHAVIORS)
 
     # half_day = random.choice(matched_acc_data[(matched_acc_data['dog ID'] == dog)]['half day [yyyy-mm-dd_am/pm]'].values)
-    half_day = '2021-09-11_am'
+    half_day = '2022-08-04_pm'  
     acc_file_path = os.path.join(acc_dir, dog + '_' + half_day + '.csv')
 
     half_day_behaviors = matched_acc_data[(matched_acc_data['dog ID'] == dog) & (matched_acc_data['half day [yyyy-mm-dd_am/pm]'] == half_day)]
@@ -126,6 +126,7 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
     smoothening_window_len = smoothening_config['smoothening_window_length']
     save_dir = os.path.join(save_dir, f'window_length_{smoothening_window_len}')
     os.makedirs(save_dir, exist_ok=True)
+    print(save_dir)
 
     if save_objects:
         np.save(os.path.join(save_dir, 'signal.npy'), signal)

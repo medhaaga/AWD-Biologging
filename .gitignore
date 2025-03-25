@@ -14,6 +14,7 @@ __pycache__/
 *.pth 
 *.pt
 *.png
+*.pdf
 
 # C extensions
 *.so

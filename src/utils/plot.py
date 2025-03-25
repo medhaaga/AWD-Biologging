@@ -12,11 +12,11 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_s
 import matplotlib as mpl
 mpl.rcParams['lines.markersize'] = 12
 mpl.rcParams['lines.linewidth'] = 2
-mpl.rcParams['xtick.labelsize'] = 25
-mpl.rcParams['ytick.labelsize'] = 25
-mpl.rcParams["axes.labelsize"] = 30
-mpl.rcParams['legend.fontsize'] = 30
-mpl.rcParams['axes.titlesize'] = 30
+mpl.rcParams['xtick.labelsize'] = 30
+mpl.rcParams['ytick.labelsize'] = 30
+mpl.rcParams["axes.labelsize"] = 40
+mpl.rcParams['legend.fontsize'] = 40
+mpl.rcParams['axes.titlesize'] = 40
 mpl.rcParams['text.usetex'] = True
 
 
@@ -154,7 +154,7 @@ def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=Tru
 
         plt.tight_layout()
         if plot_path is not None:
-            plt.savefig(plot_path)
+            plt.savefig(plot_path, format="pdf", bbox_inches="tight")
             
         plt.show()
 

@@ -6,120 +6,121 @@ import pandas as pd
 import numpy as np
 from config.settings import SAMPLING_RATE
 
-""" acc_data
-
-Save a summary of the matched accelerations with behavioral annotations.
-
-Columns 
-------
-id: string
-    Name of dog
-
-behavior: string
-   Behavioral annotation
-
-behavior_start: pd.datetime like object
-    Timestamp for start of behavior
-
-behavior_end: pd.datetime like object
-    Timestamp for end of behavior
-
-duration: float 
-    Duration of behavior in seconds
-
-date_am_pm_id: str
-    date and am/pm of the behavior
-
-acc_x: list[float]
-    list of acceleration along x axis
-
-acc_y: list[float]
-    list of acceleration along x axis_y
-
-acc_z: list[float]
-    list of acceleration along x axis
-
-"""
-
-""" acc_summary
-
-Save a summary of the matched accelerations with behavioral annotations.
-
-Columns 
-------
-id: string
-    Name of dog
-
-date_am_pm_id: pd.datetime like object
-    The object gives a unique ID to a half day.
-
-annotations: float
-    Duration of annotations available for the dog in the particlar half day.
-
-acc: float
-    Duration of acceleration data matching with annotations in the particlar half day
-
-number of matched acc: int
-    Number of behavioral annotations that were matched with acceleration data stream.
-
-
-"""
 
 
 def create_matched_data(filtered_metadata, annotations, verbose=True):
+    
     """Match the files in metadata with available annotations
 
     Arguments 
     ---------------
-    filtered_metadata: pandas dataframe 
-    annotations: pandas dataframe
+    filtered_metadata: pandas dataframe with columns ['file path', 'individual ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]']
+    annotations: pandas dataframe with columns ['id', 'Behavior', 'Timestamp_start', 'Timestamp_end', 'Source']
 
     Returns
     ----------------
-    acc_summary: pandas dataframe = summary of the matched acceleration files
-    acc_data: pandas dataframe = final matched windows of acc data 
+    acc_summary: pandas dataframe = summary of the matched acceleration files with columns 
+
+        id: string
+            individual ID
+        date_am_pm_id: string
+            In format yyyy-mm-dd_{am/pm} 
+        annotations: string 
+            behavior class
+        acc: float
+            matched acceleration duration
+        number of matched acc: int 
+            number of matched annotations in the half day
+
+    acc_data: pandas dataframe = final matched windows of acc data  with columns
+
+        individual ID: string
+            individual ID
+        behavior: string
+            behvior annotation
+        behavior_start: string 
+            behavior start time in format %Y/%m/%d %H:%M:%S
+        behavior_end: string 
+            behavior end time in format %Y/%m/%d %H:%M:%S
+        duration: float
+            duration of the matched behavior
+        year: int 
+            year of behavior observation
+        UTC Date [yyyy-mm-dd]: string 
+            date of behavior observation
+        am/pm: string 
+            AM or PM time of behavior observation
+        half day [yyyy-mm-dd_am/pm]: string 
+            half day of behavior observation
+        avg temperature [C]: float 
+            average temperature on the half day of behavior observation
+        acc_x: list-like object
+            acceleration data along X axis
+        acc_y: list-like object
+            acceleration data along Y axis
+        acc_z: list-like object 
+            acceleration data along Z axis
+        Source: string 
+            source of behavior annotation (video, audio, etc)
+
+    acc_data_metadata: pandas dataframe = metadata of the acceleration segments matched with annotations
+
+        file_path: string
+            file path where the half-day segment of the acceleration snippet is stored
+        individual ID: string
+            individual ID
+        year: int 
+            year of behavior observation
+        UTC Date [yyyy-mm-dd]: string 
+            date of behavior observation
+        am/pm: string 
+            AM or PM time of behavior observation
+        half day [yyyy-mm-dd_am/pm]: string 
+            half day of behavior observation
+        avg temperature [C]: float 
+            average temperature on the half day of behavior observation
 
     """
 
     # create dataframes for saving matched acceleration and behavior data
 
-    cols = ['dog ID', 'behavior', 'behavior_start', 'behavior_end', 'duration', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm',  'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'acc_x', 'acc_y', 'acc_z', 'Source']
+    cols = ['individual ID', 'behavior', 'behavior_start', 'behavior_end', 'duration', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm',  'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'acc_x', 'acc_y', 'acc_z', 'Source']
     acc_data = pd.DataFrame(columns=cols, index=[])
     acc_data_metadata = pd.DataFrame(columns=filtered_metadata.columns, index=[])
     acc_summary = pd.DataFrame(columns=['id', 'date_am_pm_id', 'annotations', 'acc', 'number of matched acc'], index=[])
 
 
-    # loop over all unique dogs in filtered_metadata
-    for (i, dog) in enumerate(filtered_metadata['dog ID'].unique()):
+    # loop over all unique individuals in filtered_metadata
+    for (i, individual) in enumerate(filtered_metadata['individual ID'].unique()):
 
-        ## find annotations for this dog
-        annotations_orig = annotations[annotations['id'] == dog]
-        dog_annotations = annotations_orig.copy()
+        ## find annotations for this individual
+        annotations_orig = annotations[annotations['id'] == individual]
+        individual_annotations = annotations_orig.copy()
 
         # Format and add helper columns to the annotations dataframe
-        dog_annotations['Timestamp_start'] = pd.to_datetime(annotations_orig['Timestamp_start'], format='%Y/%m/%d %H:%M:%S')
-        dog_annotations['Timestamp_end'] = pd.to_datetime(annotations_orig['Timestamp_end'], format='%Y/%m/%d %H:%M:%S')
-        dog_annotations['date'] = dog_annotations['Timestamp_start'].dt.date
-        dog_annotations['am/pm'] = dog_annotations['Timestamp_start'].dt.strftime('%P')
-        dog_annotations['half day [yyyy-mm-dd_am/pm]'] = dog_annotations['date'].astype(str) + '_' + dog_annotations['am/pm']
+        individual_annotations['Timestamp_start'] = pd.to_datetime(annotations_orig['Timestamp_start'], format='%Y/%m/%d %H:%M:%S')
+        individual_annotations['Timestamp_end'] = pd.to_datetime(annotations_orig['Timestamp_end'], format='%Y/%m/%d %H:%M:%S')
+        individual_annotations['date'] = individual_annotations['Timestamp_start'].dt.date
+        individual_annotations['am/pm'] = individual_annotations['Timestamp_start'].dt.strftime('%P')
+        individual_annotations['half day [yyyy-mm-dd_am/pm]'] = individual_annotations['date'].astype(str) + '_' + individual_annotations['am/pm']
         
-        # create submetadata file for this dog
-        dog_metadata = filtered_metadata[filtered_metadata['dog ID'] == dog]
+        # create submetadata file for this individual
+        individual_metadata = filtered_metadata[filtered_metadata['individual ID'] == individual]
 
         if verbose:
-            print('Dog {} has {} halfdays in the filtered metadata.'.format(dog, len(dog_metadata)))
+            print('individual {} has {} halfdays in the filtered metadata.'.format(individual, len(individual_metadata)))
 
-        for unique_period_loop in tqdm(dog_metadata['half day [yyyy-mm-dd_am/pm]'].unique(), desc=f'Processing unique half days for {dog}'):
+        for unique_period_loop in tqdm(individual_metadata['half day [yyyy-mm-dd_am/pm]'].unique(), desc=f'Processing unique half days for {individual}'):
 
-            annotation_available = unique_period_loop in dog_annotations['half day [yyyy-mm-dd_am/pm]'].values
+            annotation_available = unique_period_loop in individual_annotations['half day [yyyy-mm-dd_am/pm]'].values
 
             if annotation_available:
 
-                annotations_loop = dog_annotations[dog_annotations['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop]
+                annotations_loop = individual_annotations[individual_annotations['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop]
                 
-                # if the acceleration file is available for this dog and half day, read it
+                # if the acceleration file is available for this individual and half day, read it
                 
-                acc_file_path = dog_metadata.loc[dog_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'file path'].values[0]
+                acc_file_path = individual_metadata.loc[individual_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'file path'].values[0]
                 acc_loop = pd.read_csv(acc_file_path)
                 acc_loop['Timestamp'] = pd.to_datetime(acc_loop['Timestamp'], format='mixed', utc=True)
 
@@ -146,25 +147,25 @@ def create_matched_data(filtered_metadata, annotations, verbose=True):
                             acc_summary.at[acc_summary.index[-1], 'acc'] += matched_duration
                             acc_summary.at[acc_summary.index[-1], 'number of matched acc'] += 1
 
-                            acc_data.loc[len(acc_data)] = [dog, 
+                            acc_data.loc[len(acc_data)] = [individual, 
                                                             row['Behavior'], 
                                                             behaviour_acc.iloc[0]['Timestamp'], 
                                                             behaviour_acc.iloc[len(behaviour_acc)-1]['Timestamp'], 
                                                             matched_duration, 
-                                                            dog_metadata.loc[dog_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'year'].values[0],
-                                                            dog_metadata.loc[dog_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'UTC Date [yyyy-mm-dd]'].values[0],
-                                                            dog_metadata.loc[dog_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'am/pm'].values[0],
+                                                            individual_metadata.loc[individual_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'year'].values[0],
+                                                            individual_metadata.loc[individual_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'UTC Date [yyyy-mm-dd]'].values[0],
+                                                            individual_metadata.loc[individual_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'am/pm'].values[0],
                                                             unique_period_loop,
-                                                            dog_metadata.loc[dog_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'avg temperature [C]'].values[0],
+                                                            individual_metadata.loc[individual_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop, 'avg temperature [C]'].values[0],
                                                             behaviour_acc['Acc X [g]'].to_list(),
                                                             behaviour_acc['Acc Y [g]'].to_list(),
                                                             behaviour_acc['Acc Z [g]'].to_list(),
                                                             row['Source']]
 
-                            acc_data_metadata.loc[len(acc_data_metadata)] = dog_metadata.loc[dog_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop].values[0].tolist()
+                            acc_data_metadata.loc[len(acc_data_metadata)] = individual_metadata.loc[individual_metadata['half day [yyyy-mm-dd_am/pm]'] == unique_period_loop].values[0].tolist()
             
             else:
-                acc_summary.loc[len(acc_summary)] = [dog, unique_period_loop, 0, 0.0, 0]
+                acc_summary.loc[len(acc_summary)] = [individual, unique_period_loop, 0, 0.0, 0]
 
     return acc_summary, acc_data, acc_data_metadata
 
@@ -253,7 +254,7 @@ def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_be
 
 
     df_new = pd.DataFrame(columns=['acc_x', 'acc_y', 'acc_z'])
-    df_metadata = pd.DataFrame(columns=['dog ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'Source'])
+    df_metadata = pd.DataFrame(columns=['individual ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'Source'])
     
     if padding == 'zeros':
         df_new['acc_x'] = df['acc_x'].apply(pad_or_truncate_list, args=(fixed_length,))
@@ -275,7 +276,7 @@ def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_be
 
             for x, y, z in zip(acc_x_windows, acc_y_windows, acc_z_windows):
                 expanded_rows.append({'acc_x': x, 'acc_y': y, 'acc_z': z, 'behavior': row['behavior']})
-                df_metadata.loc[len(df_metadata)] = row[['dog ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'Source']].values
+                df_metadata.loc[len(df_metadata)] = row[['individual ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'Source']].values
 
         df_new = pd.DataFrame(expanded_rows)
     else:

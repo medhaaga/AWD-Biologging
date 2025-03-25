@@ -34,14 +34,14 @@ def get_exp_filter_profiles(exp_name):
 
     """Return the train and test filter profiles for our different experiments."""
 
-    train_filter_profile = {'dog ID': None,
+    train_filter_profile = {'individual ID': None,
                    'year': None,
                    'UTC Date [yyyy-mm-dd]': None,
                    'am/pm': None,
                    'half day [yyyy-mm-dd_am/pm]': None,
                    'avg temperature [C]': None}
 
-    test_filter_profile = {'dog ID': None,
+    test_filter_profile = {'individual ID': None,
                 'year': None,
                 'UTC Date [yyyy-mm-dd]': None,
                 'am/pm': None,
@@ -52,8 +52,8 @@ def get_exp_filter_profiles(exp_name):
         pass
         
     elif exp_name == 'interdog':
-        train_filter_profile['dog ID'] = ['jessie', 'palus', 'ash', 'fossey']
-        test_filter_profile['dog ID'] = ['green',]
+        train_filter_profile['individual ID'] = ['jessie', 'palus', 'ash', 'fossey']
+        test_filter_profile['individual ID'] = ['green',]
     
     elif exp_name == 'interyear':
         train_filter_profile['year'] = [2021,]
@@ -337,7 +337,19 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, beh
     args: dictionary 
     match: bool = whether to match behaviors or use a pre-matched dataframe
 
+    Returns 
+    ----------------------
+    X_train     : (n, d, T) np ndarray = train acceleration, n = no. of samples, d = no. of features, T = time axis            
+    y_train     : (n, K) np ndarray    = train labels, n = no. of samples, K = one-hot vector for the K classes behavior label 
+    z_train     : pandas dataframe     = metadata associated with the train observations                                       
+    X_val       : (n, d, T) np ndarray = val acceleration, n = no. of samples, d = no. of features, T = time axis           
+    y_val       : (n, K) np ndarray    = val labels, n = no. of samples, K = one-hot vector for the K classes behavior label   
+    z_val       : pandas dataframe     = metadata associated with the validation observations                                  
+    X_test      : (n, d, T) np ndarray = test acceleration, n = no. of samples, d = no. of features, T = time axis             
+    y_test      : (n, K) np ndarray    = test labels, n = no. of samples, K = one-hot vector for the K classes behavior label  
+    z_test      : pandas dataframe     = metadata associated with the test observations                                        
     """
+
     t1 = time.time()
     if args.match:
         print('Matching acceleration-behavior pairs...')
