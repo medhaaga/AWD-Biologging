@@ -52,11 +52,12 @@ BEHAVIORS = ['Feeding', 'Resting', 'Moving', 'Running', 'Vigilant']
 
 # test paths
 
-TEST_ROOT_DIR = "/mnt/ssd/medhaaga/wildlife/Vectronics/test"
-TEST_PATHS = {"individual_1": "/mnt/ssd/medhaaga/wildlife/Vectronics/test/individual1",
-                "individual_2": "/mnt/ssd/medhaaga/wildlife/Vectronics/test/individual2",
-                "individual_3": "/mnt/ssd/medhaaga/wildlife/Vectronics/test/individual3"}
-TEST_METADATA_PATH = "/mnt/ssd/medhaaga/wildlife/Vectronics/test_metadata.csv"
-TEST_VIDEO_ANNOTATIONS_PATH = "/mnt/ssd/medhaaga/wildlife/Vectronics/test_video_labels_annotations.csv"
-TEST_AUDIO_ANNOTATIONS_PATH = "/mnt/ssd/medhaaga/wildlife/Vectronics/test_audio_labels_annotations.csv"
-TEST_ANNOTATIONS_PATH = "/mnt/ssd/medhaaga/wildlife/Vectronics/test/test_all_annotations.csv"
+WILDLIFE_DIR = "/Users/medha/Documents/GitHub/AWD-Biologging"
+TEST_ROOT_DIR = WILDLIFE_DIR+"/test"
+TEST_PATHS = {"individual1":  TEST_ROOT_DIR+"/individual1",
+                "individual2":  TEST_ROOT_DIR+"/individual2",
+                "individual3":  TEST_ROOT_DIR+"/individual3"}
+TEST_METADATA_PATH = TEST_ROOT_DIR+"/test_metadata.csv"
+TEST_VIDEO_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_video_labels_annotations.csv"
+TEST_AUDIO_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_audio_labels_annotations.csv"
+TEST_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_all_annotations.csv"

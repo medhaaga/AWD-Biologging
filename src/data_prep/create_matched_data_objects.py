@@ -81,7 +81,6 @@ def create_matched_data(filtered_metadata, annotations, verbose=True):
             average temperature on the half day of behavior observation
 
     """
-
     # create dataframes for saving matched acceleration and behavior data
 
     cols = ['individual ID', 'behavior', 'behavior_start', 'behavior_end', 'duration', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm',  'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'acc_x', 'acc_y', 'acc_z', 'Source']
@@ -101,7 +100,7 @@ def create_matched_data(filtered_metadata, annotations, verbose=True):
         individual_annotations['Timestamp_start'] = pd.to_datetime(annotations_orig['Timestamp_start'], format='%Y/%m/%d %H:%M:%S')
         individual_annotations['Timestamp_end'] = pd.to_datetime(annotations_orig['Timestamp_end'], format='%Y/%m/%d %H:%M:%S')
         individual_annotations['date'] = individual_annotations['Timestamp_start'].dt.date
-        individual_annotations['am/pm'] = individual_annotations['Timestamp_start'].dt.strftime('%P')
+        individual_annotations['am/pm'] = pd.to_datetime(individual_annotations['Timestamp_start'], format="%Y/%m/%d %H:%M:%S").dt.strftime('%p') 
         individual_annotations['half day [yyyy-mm-dd_am/pm]'] = individual_annotations['date'].astype(str) + '_' + individual_annotations['am/pm']
         
         # create submetadata file for this individual
@@ -130,7 +129,8 @@ def create_matched_data(filtered_metadata, annotations, verbose=True):
                     behaviour_end_time = row['Timestamp_end'].to_pydatetime().replace(tzinfo=timezone('UTC'))
 
                     if not pd.isnull(behaviour_end_time):
-                            acc_summary.at[acc_summary.index[-1], 'annotations'] += (behaviour_end_time - behaviour_start_time).total_seconds() 
+                        acc_summary.loc[len(acc_summary)] = [individual, unique_period_loop, 0, 0.0, 0]
+                        acc_summary.at[acc_summary.index[-1], 'annotations'] += (behaviour_end_time - behaviour_start_time).total_seconds() 
             
                     
                     if (not pd.isnull(behaviour_end_time)) & (behaviour_end_time > behaviour_start_time):          

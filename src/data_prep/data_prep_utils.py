@@ -61,10 +61,10 @@ def filter_data(metadata, filter_profile):
 
         filter_idx = np.arange(len(metadata))
 
-        # filter desired dog ID
-        if filter_profile['dog ID'] is not None:
-                assert isinstance(filter_profile['dog ID'], list), "dog ID filter should be a list"
-                filter_idx = [idx for idx in filter_idx if metadata.iloc[idx]['dog ID'] in filter_profile['dog ID']]
+        # filter desired individual ID
+        if filter_profile['individual ID'] is not None:
+                assert isinstance(filter_profile['individual ID'], list), "individual ID filter should be a list"
+                filter_idx = [idx for idx in filter_idx if metadata.iloc[idx]['individual ID'] in filter_profile['individual ID']]
 
         # filter desired year
         if filter_profile['year'] is not None:

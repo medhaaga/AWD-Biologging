@@ -82,5 +82,43 @@ def format_time(elapsed):
     return str(datetime.timedelta(seconds=elapsed_rounded))
 
 
+## Test paths
+def get_test_matched_data_path():
+    data_path = get_path(['data', 'test'], get_project_root())
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'matched_acc_data.csv')
+    return path
+
+def get_test_matched_metadata_path():
+    data_path = get_path(['data', 'test'], get_project_root())
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'matched_acc_metadata.csv')
+    return path
+
+def get_test_matched_summary_path():
+    data_path = get_path(['data', 'test'], get_project_root())
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'matched_acc_summary.csv')
+    return path
+
+def get_test_metadata_path():
+    data_path = os.path.join(get_project_root(), 'data')
+    os.makedirs(data_path, exist_ok=True)
+    path = os.path.join(data_path, 'metadata.csv')
+    return path
+
+def get_test_results_dir():
+    path = get_path(['results', 'test'], get_project_root())
+    os.makedirs(path, exist_ok=True)
+    return path
+
+def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):
+    results_dir = get_test_results_dir()
+    os.makedirs(results_dir, exist_ok=True)
+    levels = ['predictions', exp_name, 'conv_layers_'+str(n_CNNlayers), \
+             'n_channels_'+str(n_channels), 'kernel_size_'+str(kernel_size), \
+             'theta_'+str(theta), 'duration_'+str(window_duration_percentile)]
+    return get_path(levels, results_dir)
+
 if __name__ == '__main__':
     print(get_results_path('no_split', 5, 32, 5, 0.0, 50))

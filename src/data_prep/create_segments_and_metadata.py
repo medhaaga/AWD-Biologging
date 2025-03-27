@@ -5,8 +5,14 @@ sys.path.append('../')
 sys.path.append('../../')
 import time
 import pandas as pd
+from datetime import datetime
 from config.settings import (AWD_VECTRONICS_PATHS, 
                              VECTRONICS_METADATA_PATH)
+
+
+def get_am_pm(time_str):
+    dt = datetime.strptime(time_str, "%H:%M:%S")
+    return "AM" if dt.hour < 12 else "PM"
 
 def process_chunk_vectronics(chunk, individual, file_dir, verbose=False):
 
@@ -24,13 +30,12 @@ def process_chunk_vectronics(chunk, individual, file_dir, verbose=False):
 
     chunk['Timestamp'] = pd.to_datetime(chunk['UTC Date[mm/dd/yyyy]'] + ' ' + chunk['UTC DateTime'] , format='%m/%d/%Y %H:%M:%S')
     chunk['Timestamp'] += pd.to_timedelta(chunk['Milliseconds'], unit='ms')
-    chunk['date_am_pm_id'] = pd.to_datetime(chunk['UTC Date[mm/dd/yyyy]'], format='%m/%d/%Y').dt.date.astype(str) + '_' + chunk['Timestamp'].dt.strftime('%P')
+    chunk['date_am_pm_id'] = pd.to_datetime(chunk['UTC Date[mm/dd/yyyy]'], format='%m/%d/%Y').dt.date.astype(str) + '_' + pd.to_datetime(chunk['UTC DateTime'], format="%H:%M:%S").dt.strftime('%p') 
 
     unique_half_days = chunk['date_am_pm_id'].unique()
-    print(f"{'Number of half days in chunk:':<30} {len(unique_half_days)}")
+    # print(f"{'Number of half days in chunk:':<30} {len(unique_half_days)}")
 
-    for x in unique_half_days:
-        
+    for x in unique_half_days:        
         df = chunk[chunk['date_am_pm_id'] == x]
         
         file_name = os.path.join(file_dir, '{}_{}.csv'.format(individual, x))
@@ -74,8 +79,7 @@ def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0):
         num_chunks = 0
 
         # Use chunksize to read the file in smaller portions
-        for chunk in pd.read_csv(path, skiprows=1, chunksize=chunk_size):
-            print(chunk.columns)
+        for chunk in pd.read_csv(path, chunksize=chunk_size): # add argument "skiprows=1" if the CSV file does not start with column names 
             num_chunks += 1
             year = os.path.basename(path).split('.')[0]
             chunk['UTC Date[mm/dd/yyyy]'] = chunk['UTC Date[mm/dd]'] + '/' + year

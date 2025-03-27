@@ -269,7 +269,7 @@ def match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, be
 
     return df_train, df_test
 
-def load_matched_train_test_df(collapse_behavior_mapping, behaviors, args):
+def load_matched_train_test_df(collapse_behavior_mapping, behaviors, exp_name, acc_data_path, acc_metadata_path, train_test_split=0.2):
 
 
     """load pre-matched accereation-behavior data. Create train and test dataframes based on filter profiles
@@ -278,7 +278,10 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, args):
     ----------------
     collapse_behavior_mapping: dictionary 
     behaviors: list = list of desired behaviors
-    args: dictionary
+    args.experiment_name: string = name of experiment provided to `get_exp_filter_profiles` function.
+    acc_data_path: string = path where matched acceleration data is stored
+    acc_metadata_path: string = path where matched acceleration metadata is stored
+    train_test_split: float = proportion of test data in overlapping data points
     
     Returns
     -----------------
@@ -286,10 +289,10 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, args):
     df_test: pd DataFrame
     """
 
-    train_filter_profile, test_filter_profile = get_exp_filter_profiles(args.experiment_name) 
+    train_filter_profile, test_filter_profile = get_exp_filter_profiles(exp_name) 
     
-    acc_data = pd.read_csv(get_matched_data_path())
-    acc_data_metadata = pd.read_csv(get_matched_metadata_path())
+    acc_data = pd.read_csv(acc_data_path)
+    acc_data_metadata = pd.read_csv(acc_metadata_path)
 
     acc_data['acc_x'] = acc_data['acc_x'].apply(ast.literal_eval)
     acc_data['acc_y'] = acc_data['acc_y'].apply(ast.literal_eval)
@@ -310,7 +313,7 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, args):
     if len(set(train_filter_idx) & set(test_filter_idx)):
         warnings.warn("train and test filters overlap", UserWarning)
         print(f'Before overlap, \nno. of train observations: {len(train_filter_idx)}, no. of test observations: {len(test_filter_idx)}')
-        train_filter_idx, test_filter_idx = split_overlapping_indices(train_filter_idx, test_filter_idx, acc_data['behavior'].values, split_ratio=args.train_test_split)
+        train_filter_idx, test_filter_idx = split_overlapping_indices(train_filter_idx, test_filter_idx, acc_data['behavior'].values, split_ratio=train_test_split)
         print(f'After removing overlaps, \nno. of train observations: {len(train_filter_idx)}, no. of test observations: {len(test_filter_idx)}')
     else:
         print(f'No overlaps. \nno. of train observations: {len(train_filter_idx)}, no. of test observations: {len(test_filter_idx)}')
@@ -325,7 +328,9 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, args):
     return df_train, df_test
 
 
-def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, behaviors, args, reuse_behaviors=[]):
+def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, 
+                        behaviors, args, reuse_behaviors=[], acc_data_path=None, 
+                        acc_metadata_path=None):
 
     """
     Arguments
@@ -336,27 +341,35 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, beh
     behaviors: list = list of behaviors of interest
     args: dictionary 
     match: bool = whether to match behaviors or use a pre-matched dataframe
+    acc_data_path: string = path where matched acceleration data is stored, default=None
+    acc_metadata_path: string = path where matched acceleration metadata is stored, default=None
+    
 
     Returns 
     ----------------------
     X_train     : (n, d, T) np ndarray = train acceleration, n = no. of samples, d = no. of features, T = time axis            
-    y_train     : (n, K) np ndarray    = train labels, n = no. of samples, K = one-hot vector for the K classes behavior label 
+    y_train     : (n, ) np ndarray    = train labels, n = no. of samples
     z_train     : pandas dataframe     = metadata associated with the train observations                                       
     X_val       : (n, d, T) np ndarray = val acceleration, n = no. of samples, d = no. of features, T = time axis           
-    y_val       : (n, K) np ndarray    = val labels, n = no. of samples, K = one-hot vector for the K classes behavior label   
+    y_val       : (n, ) np ndarray    = val labels, n = no. of samples
     z_val       : pandas dataframe     = metadata associated with the validation observations                                  
     X_test      : (n, d, T) np ndarray = test acceleration, n = no. of samples, d = no. of features, T = time axis             
-    y_test      : (n, K) np ndarray    = test labels, n = no. of samples, K = one-hot vector for the K classes behavior label  
+    y_test      : (n, ) np ndarray    = test labels, n = no. of samples
     z_test      : pandas dataframe     = metadata associated with the test observations                                        
     """
 
     t1 = time.time()
-    if args.match:
+    if args.match or (acc_data_path is None) or (acc_metadata_path is None):
         print('Matching acceleration-behavior pairs...')
         df_train, df_test = match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, behaviors, args)
     else:
         print('Using pre-matched acceleration-behavior pairs...')
-        df_train, df_test = load_matched_train_test_df(collapse_behavior_mapping, behaviors, args)
+        df_train, df_test = load_matched_train_test_df(collapse_behavior_mapping=collapse_behavior_mapping, 
+                                                        behaviors=behaviors, 
+                                                        exp_name=args.experiment_name, 
+                                                        acc_data_path=acc_data_path,
+                                                        acc_metadata_path=acc_metadata_path,
+                                                        train_test_split=args.train_test_split)
 
     print("")
     print("==================================")
