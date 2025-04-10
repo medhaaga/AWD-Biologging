@@ -112,7 +112,7 @@ def get_test_results_dir():
     os.makedirs(path, exist_ok=True)
     return path
 
-def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):
+def get_test_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):
     results_dir = get_test_results_dir()
     os.makedirs(results_dir, exist_ok=True)
     levels = ['predictions', exp_name, 'conv_layers_'+str(n_CNNlayers), \
