@@ -52,7 +52,8 @@ BEHAVIORS = ['Feeding', 'Resting', 'Moving', 'Running', 'Vigilant']
 
 # test paths
 
-WILDLIFE_DIR = "/Users/medha/Documents/GitHub/AWD-Biologging"
+# WILDLIFE_DIR = "/Users/medha/Documents/GitHub/AWD-Biologging"
+WILDLIFE_DIR = "/home/medhaaga/AWD-Biologging"
 TEST_ROOT_DIR = WILDLIFE_DIR+"/test"
 TEST_PATHS = {"individual1":  TEST_ROOT_DIR+"/individual1",
                 "individual2":  TEST_ROOT_DIR+"/individual2",

@@ -18,7 +18,7 @@ mpl.rcParams["axes.labelsize"] = 40
 mpl.rcParams['legend.fontsize'] = 40
 mpl.rcParams['axes.titlesize'] = 40
 mpl.rcParams['text.usetex'] = True
-
+import config as config
 
 def plot_raw_time_series(X, y, save_path=None):
     """
@@ -258,23 +258,25 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
 
     # Plot the signal
     signal_x = signal[0,0,:]
-    ax_signal.plot(time, signal_x, color='#15316A', linewidth=1)
+    ax_signal.plot(time, signal[0,0,:], label='X Signal', color='black', linewidth=.5, alpha=0.6)
+    ax_signal.plot(time, signal[0,1,:], label='Y Signal', color='blue', linewidth=.5, alpha=0.5)
+    ax_signal.plot(time, signal[0,2,:], label='Z Signal', color='maroon', linewidth=.5, alpha=0.4)
     ax_signal.set_xlabel('Time (h)')
     ax_signal.set_ylabel("Amplitude (g)")
     ax_signal.set_title("Raw Signal along X axis")
 
+
     # Plot behaviors
     if half_day_behaviors is not None:
-        color_palette = ['green', 'hotpink', 'gray', 'brown', 'powderblue']
-        alphas = [1, 0.8, 0.2, 1, 0.4]
+        colors = dict(zip(config.BEHAVIORS, sns.color_palette("Set2", len(config.BEHAVIORS))))
         for i in range(len(half_day_behaviors)):
-            behavior_idx = label_encoder.transform([half_day_behaviors.iloc[i]['behavior']]).item()
+            behavior = half_day_behaviors.iloc[i]['behavior']
             ax_signal.axvspan(half_day_behaviors.iloc[i]['behavior_start'], 
                               half_day_behaviors.iloc[i]['behavior_end'], 
-                              color=color_palette[behavior_idx], 
-                              alpha=alphas[behavior_idx])
-    legend_handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=color_palette[i], markersize=10, label=label_encoder.classes_[i])
-                  for i in range(len(label_encoder.classes_))]
+                              color=colors[behavior], 
+                              alpha=0.3)
+    legend_handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=colors[behavior], markersize=10, alpha=0.3, label=behavior)
+                  for behavior in label_encoder.classes_]
     ax_signal.legend(handles=legend_handles, loc='upper right', bbox_to_anchor=(1.26, 1.14), fontsize=25)
 
 

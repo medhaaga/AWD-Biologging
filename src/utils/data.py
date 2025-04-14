@@ -63,6 +63,10 @@ def get_exp_filter_profiles(exp_name):
         train_filter_profile['am/pm'] = ['am',]
         test_filter_profile['am/pm'] = ['pm',]
 
+    elif exp_name == 'test_interyear':
+        train_filter_profile['year'] = [2022,]
+        test_filter_profile['year'] = [2025,]
+
     else:
         raise ValueError("Unspecified experiment name")
 

@@ -14,7 +14,7 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
     assert len(X.shape) == 3, "Signal is not 3-dimensional"
 
     if (window_length is None) & (window_duration is None):
-        raise ValueError('A window length/duratioon for the classification model is required.')
+        raise ValueError('A window length/duration for the classification model is required.')
     
     if (window_length is None) & (window_duration is not None):
         window_length = int(window_duration*sampling_frequency)
