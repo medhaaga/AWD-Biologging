@@ -1,5 +1,6 @@
 import os
 import sys
+import config as config
 from tqdm import tqdm
 sys.path.append('../')
 sys.path.append('../../')
@@ -33,7 +34,7 @@ def process_chunk_vectronics(chunk, individual, file_dir, verbose=False):
     chunk['date_am_pm_id'] = pd.to_datetime(chunk['UTC Date[mm/dd/yyyy]'], format='%m/%d/%Y').dt.date.astype(str) + '_' + pd.to_datetime(chunk['UTC DateTime'], format="%H:%M:%S").dt.strftime('%p') 
 
     unique_half_days = chunk['date_am_pm_id'].unique()
-    # print(f"{'Number of half days in chunk:':<30} {len(unique_half_days)}")
+    print(f"{'Number of half days in chunk:':<30} {len(unique_half_days)}, chunk duration: {len(chunk)/(config.SAMPLING_RATE * 3600)}")
 
     for x in unique_half_days:        
         df = chunk[chunk['date_am_pm_id'] == x]
@@ -53,7 +54,7 @@ def process_chunk_vectronics(chunk, individual, file_dir, verbose=False):
         
 
 
-def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0):
+def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0, verbose=False):
 
     '''break the yearly csv files for each individual into chunks
 
@@ -74,6 +75,10 @@ def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0):
 
         file_dir = os.path.join(os.path.dirname(path), 'combined_acc')
         os.makedirs(file_dir, exist_ok=True)
+        for filename in os.listdir(file_dir):
+            file_path = os.path.join(file_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
 
         chunk_size = 10**6  # Adjust the chunk size based on your available memory
         num_chunks = 0
@@ -83,7 +88,7 @@ def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0):
             num_chunks += 1
             year = os.path.basename(path).split('.')[0]
             chunk['UTC Date[mm/dd/yyyy]'] = chunk['UTC Date[mm/dd]'] + '/' + year
-            process_chunk_vectronics(chunk, individual, file_dir)
+            process_chunk_vectronics(chunk, individual, file_dir, verbose=verbose)
             del chunk
 
             if max_chunks > 0 and num_chunks == max_chunks:
@@ -92,7 +97,7 @@ def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0):
         time.sleep(10)
 
 
-def run_vectronics(path_mappings, max_chunks=0):
+def run_vectronics(path_mappings, max_chunks=0, verbose=False):
     """
     create segments by reading accelerometer data in chunks. Saves the segments in a 
     directory titled "combined_acc" inside the data directory of each individual.
@@ -116,7 +121,7 @@ def run_vectronics(path_mappings, max_chunks=0):
     for individual, acc_filepaths in data:
         print(f"{'Processing individual:':<30} {individual}")
         print(f"{'Files for this individual :':<30}", [os.path.basename(file) for file in acc_filepaths])
-        combine_acc_vectronics(individual, acc_filepaths, max_chunks=max_chunks)
+        combine_acc_vectronics(individual, acc_filepaths, max_chunks=max_chunks, verbose=verbose)
         print("")
 
 def create_metadata(path_mappings, metadata_path):

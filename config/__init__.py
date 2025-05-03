@@ -13,4 +13,7 @@ from .settings import (VECTRONICS_BEHAVIOR_EVAL_PATH,
                        TEST_METADATA_PATH,
                        TEST_VIDEO_ANNOTATIONS_PATH,
                        TEST_AUDIO_ANNOTATIONS_PATH,
-                       TEST_ANNOTATIONS_PATH)
+                       TEST_ANNOTATIONS_PATH,
+                       SIM_BEHAVIORS,
+                       SIMULATION_CONSTANTS,
+                       WRONG_BEHAVIORS)

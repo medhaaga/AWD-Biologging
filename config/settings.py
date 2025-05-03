@@ -1,4 +1,6 @@
 import pytz
+import pandas as pd
+
 # GLOBAL VARIABLES 
 
 # These global variables should be modified based on the path and structure of your data.
@@ -49,6 +51,7 @@ COLLAPSE_BEHAVIORS_MAPPING = {'Lying (head up)': 'Vigilant',
 
 # behaviors of interest for classification 
 BEHAVIORS = ['Feeding', 'Resting', 'Moving', 'Running', 'Vigilant']
+SIM_BEHAVIORS = ['Feeding', 'Moving', 'Resting', 'Vigilant']
 
 # test paths
 
@@ -62,3 +65,34 @@ TEST_METADATA_PATH = TEST_ROOT_DIR+"/test_metadata.csv"
 TEST_VIDEO_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_video_labels_annotations.csv"
 TEST_AUDIO_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_audio_labels_annotations.csv"
 TEST_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_all_annotations.csv"
+
+sim_constants = [
+    
+    # Feeding — bring down the amplitude and overlap with Moving
+    ("Feeding", "X", (1.8, 1.9, 2.0), (1.5, 1.8, 2.0), (0.2, 0.7, 1.2), 0.5),
+    ("Feeding", "Y", (1.9, 1.8, 2.1), (1.6, 1.9, 2.0), (0.3, 0.8, 1.3), 0.6),
+    ("Feeding", "Z", (2.0, 1.9, 1.8), (1.7, 1.8, 2.0), (0.4, 0.9, 1.4), 0.5),
+
+    # Moving — slightly reduce amplitude, overlap more with Feeding
+    ("Moving", "X", (1.9, 2.0, 2.2), (1.7, 1.9, 2.3), (0.6, 1.2, 1.8), 0.7),
+    ("Moving", "Y", (1.9, 2.0, 2.1), (2.0, 2.0, 2.2), (0.5, 1.0, 1.5), 0.6),
+    ("Moving", "Z", (2.0, 2.1, 2.2), (2.0, 2.1, 2.2), (0.7, 1.2, 1.8), 0.6),
+    # Resting — make it slightly jittery to overlap with Vigilant
+    ("Resting", "X", (0.2, 0.3, 0.4), (0.1, 0.15, 0.1), (0.0, 0.1, 0.2), 0.15),
+    ("Resting", "Y", (0.2, 0.3, 0.4), (0.1, 0.15, 0.1), (0.0, 0.1, 0.2), 0.2),
+    ("Resting", "Z", (0.2, 0.3, 0.4), (0.1, 0.15, 0.1), (0.0, 0.1, 0.2), 0.2),
+
+    # Vigilant — lower the amplitude and raise noise to blur with Resting
+    ("Vigilant", "X", (0.3, 0.4, 0.8), (0.2, 0.1, 0.15), (0.0, 0.3, 0.6), 0.3),
+    ("Vigilant", "Y", (0.3, 0.4, 0.5), (0.3, 0.1, 0.15), (0.0, 0.4, 0.8), 0.35),
+    ("Vigilant", "Z", (0.4, 0.6, 0.7), (0.3, 0.1, 0.2), (0.0, 0.5, 1.0), 0.4),
+]
+
+SIMULATION_CONSTANTS = pd.DataFrame(sim_constants, columns=[
+    "Behavior", "Axis", "f", "A", "phi", "sigma"
+])
+
+WRONG_BEHAVIORS = {'Feeding': 'Feeding',
+                    'Moving': 'Feeding', 
+                    'Resting': 'Vigilant', 
+                    'Vigilant': 'Resting'}

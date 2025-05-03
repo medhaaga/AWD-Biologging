@@ -381,7 +381,13 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping,
 
     t2 = time.time()
     # fix sequence max length and truncate/pad data to create X, y, and z.
-    max_acc_duration = np.percentile(np.concatenate((df_train['duration'].values, df_test['duration'].values), axis=0), args.window_duration_percentile)
+    if args.window_duration_percentile is not None:
+        max_acc_duration = np.percentile(np.concatenate((df_train['duration'].values, df_test['duration'].values), axis=0), args.window_duration_percentile)
+    elif args.window_duration is not None:
+        max_acc_duration = args.window_duration
+    else:
+        ValueError("Both window_duration_percentile and window_duration cannot be None in arguments.")
+        
     max_steps = int(max_acc_duration*SAMPLING_RATE)
     X, y, z = create_padded_or_truncated_data(df_train, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
     X_test, y_test, z_test = create_padded_or_truncated_data(df_test, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
