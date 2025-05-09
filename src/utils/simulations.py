@@ -364,3 +364,36 @@ def plot_simulated_day(acc_df):
 
     plt.tight_layout()
     plt.show()
+
+def generate_dataset(data_constants, class_distribution, window_length, n_samples, wrong_behavior=False, wrong_behavior_prob=0.4):
+    behaviors = list(class_distribution.keys())
+    probabilities = list(class_distribution.values())
+
+    def simulate_behavior_signal(behavior, window_length):
+
+        signal = []
+        for i in ['X', 'Y', 'Z']:
+            f, A, phi, sigma = data_constants.loc[
+                            (data_constants["Behavior"] == behavior) & 
+                            (data_constants["Axis"] == i), ['f', 'A', 'phi', 'sigma']
+                        ].values[0]
+
+            signal.append(simulate_axis_signal(f, A, phi, sigma, window_length))
+
+        return np.vstack(signal)
+    
+    X_list, y_list = [], []
+    for _ in range(n_samples):
+
+        behavior = np.random.choice(behaviors, p=probabilities)
+        y_list.append(behavior)
+
+        if wrong_behavior & (np.random.rand() < wrong_behavior_prob):
+            behavior = config.WRONG_BEHAVIORS[behavior]
+
+        signal = simulate_behavior_signal(behavior=behavior, window_length=window_length)
+        X_list.append(signal)
+    
+    X = np.stack(X_list)  # shape: (N, 3, T)
+    y = np.array(y_list)  # shape: (N,)
+    return X, y
