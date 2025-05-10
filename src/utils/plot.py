@@ -120,6 +120,8 @@ def plot_fourier_features(X, y, num_plots=1, fps=16, ylim=[None, None, None], st
 
 
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score, precision_score, recall_score, f1_score
+
 def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=True, return_accuracy=False, return_precision=False, return_recall=False, return_f1=False, plot_path=None, average='macro'):
     
     if split == 'test':
@@ -138,26 +140,24 @@ def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=Tru
         cm = confusion_matrix(y, predictions, normalize='true')
         class_names = label_encoder.inverse_transform(np.arange(len(np.unique(y))))
 
+        plt.clf()
+
         fig, ax = plt.subplots(figsize=(8, 8))
-        disp = ConfusionMatrixDisplay(cm, display_labels=class_names)
-        disp.plot(ax=ax, cmap=plt.cm.Blues, values_format='.2f', colorbar=False)
-        ax.xaxis.set_tick_params(rotation=90)  # Set x-axis label rotation
-        for text in disp.ax_.texts:
-            text.set_fontsize(20) 
+        sns.heatmap(cm, annot=True, fmt=".2f", cmap="Blues", 
+                    xticklabels=class_names, yticklabels=class_names,
+                    cbar=False, square=True, linewidths=0,
+                    annot_kws={"size": 20},)
 
-        disp.ax_.set_xticklabels(disp.display_labels, fontsize=25)  
-        disp.ax_.set_yticklabels(disp.display_labels, fontsize=25) 
-
-        disp.ax_.set_xlabel('Predicted Label',labelpad=20)  
-        disp.ax_.set_ylabel('True Label', labelpad=20)  
-
+        ax.set_xlabel("Predicted Label", fontsize=25, labelpad=20)
+        ax.set_ylabel("True Label", fontsize=25, labelpad=20)
+        ax.set_xticklabels(class_names, fontsize=20, rotation=90)
+        ax.set_yticklabels(class_names, fontsize=20, rotation=0)
 
         plt.tight_layout()
-        if plot_path is not None:
+        if plot_path:
             plt.savefig(plot_path, format="pdf", bbox_inches="tight")
-            
         plt.show()
-
+    
     if return_accuracy:
         label_accuracies = accuracy_score(y, predictions) 
         return label_accuracies
