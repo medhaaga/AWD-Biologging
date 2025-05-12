@@ -163,15 +163,15 @@ def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=Tru
         return label_accuracies
     
     if return_precision:
-        label_precisions = precision_score(y, predictions, average=average) 
+        label_precisions = precision_score(y, predictions, average=average, zero_division=0) 
         return label_precisions
     
     if return_recall:
-        label_recalls = recall_score(y, predictions, average=average)
+        label_recalls = recall_score(y, predictions, average=average, zero_division=0)
         return label_recalls
     
     if return_f1:
-        label_f1s = f1_score(y, predictions, average=average) 
+        label_f1s = f1_score(y, predictions, average=average, zero_division=0) 
         return label_f1s
 
 def plot_signal(signal, sampling_rate):

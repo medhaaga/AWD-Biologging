@@ -157,8 +157,6 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
         ) 
 
     end_time = time.time()
-    print("")
-    print("=======================")
     print(f'Total training time: {utils_io.format_time(end_time-start_time)}')   
 
     return {'model': model,

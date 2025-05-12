@@ -5,6 +5,10 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from scipy.stats import skew, kurtosis
+from scipy.stats import linregress
+from scipy.stats import circvar
+from scipy.spatial.distance import cdist
 
 sys.path.append('.')
 sys.path.append('../')
@@ -397,3 +401,73 @@ def generate_dataset(data_constants, class_distribution, window_length, n_sample
     X = np.stack(X_list)  # shape: (N, 3, T)
     y = np.array(y_list)  # shape: (N,)
     return X, y
+
+def compute_features(data):
+
+    """
+    Vectorized feature computation for shape (N, 3, T)
+    Returns a pandas DataFrame with 38 named columns representing univariate summary statsitics of the time series
+    """
+    N, C, T = data.shape
+    assert C == 3, "Expected shape (N, 3, T)"
+
+    x, y, z = data[:, 0], data[:, 1], data[:, 2]
+    q = np.sqrt(x**2 + y**2 + z**2)
+
+    def autocorr1(ts):
+        return np.array([
+            np.corrcoef(ts[i, :-1], ts[i, 1:])[0, 1] if ts.shape[1] > 1 else np.nan
+            for i in range(ts.shape[0])
+        ])
+
+    def trends(ts):
+        t = np.arange(T)
+        t_mean = np.mean(t)
+        t_var = np.var(t)
+        ts_mean = np.mean(ts, axis=1)
+        cov = np.mean(ts * (t - t_mean), axis=1) - ts_mean * 0
+        return cov / t_var
+
+    def summary_stats(ts, name):
+        return {
+            f'{name}_mean': np.mean(ts, axis=1),
+            f'{name}_std': np.std(ts, axis=1),
+            f'{name}_skew': skew(ts, axis=1),
+            f'{name}_kurtosis': kurtosis(ts, axis=1),
+            f'{name}_max': np.max(ts, axis=1),
+            f'{name}_min': np.min(ts, axis=1),
+            f'{name}_autocorr': autocorr1(ts),
+            # f'{name}_trend': trends(ts),
+        }
+
+    stats = {}
+    for name, ts in zip(['x', 'y', 'z', 'q'], [x, y, z, q]):
+        stats.update(summary_stats(ts, name))
+
+    stats['corr_xy'] = np.array([np.corrcoef(x[i], y[i])[0, 1] for i in range(N)])
+    stats['corr_xz'] = np.array([np.corrcoef(x[i], z[i])[0, 1] for i in range(N)])
+    stats['corr_yz'] = np.array([np.corrcoef(y[i], z[i])[0, 1] for i in range(N)])
+
+    stats['odba'] = np.mean(
+        np.abs(x - np.mean(x, axis=1, keepdims=True)) +
+        np.abs(y - np.mean(y, axis=1, keepdims=True)) +
+        np.abs(z - np.mean(z, axis=1, keepdims=True)),
+        axis=1
+    )
+
+    q_safe = np.clip(q, 1e-8, None)
+    theta = np.arccos(np.clip(z / q_safe, -1, 1))
+    phi = np.arctan2(y, x)
+
+    stats['inclination_circvar'] = np.array([circvar(theta[i], high=np.pi, low=0) for i in range(N)])
+    stats['azimuth_circvar'] = np.array([circvar(phi[i], high=np.pi, low=-np.pi) for i in range(N)])
+
+    # Combine into DataFrame
+    df = pd.DataFrame(stats)
+    return df
+
+def energy_distance(X, Y):
+    d_xy = cdist(X, Y).mean()
+    d_xx = cdist(X, X).mean()
+    d_yy = cdist(Y, Y).mean()
+    return 2 * d_xy - d_xx - d_yy
