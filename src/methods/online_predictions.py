@@ -28,7 +28,7 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
         hop_length = window_length
 
     # check if model and window duration are compatible
-    cmodel = torch.load(os.path.join(model_dir, 'cmodel.pt'), weights_only=True).to(device)
+    cmodel = torch.load(os.path.join(model_dir, 'cmodel.pt'), weights_only=False).to(device)
 
     zero_signal = torch.zeros(1, 3, window_length).to(device)
     assert cmodel.model[:-2](zero_signal).shape[-1] == cmodel.model[-2].in_features, "Window duration and model not compatible"

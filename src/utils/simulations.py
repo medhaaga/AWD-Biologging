@@ -231,7 +231,7 @@ def generate_acc_data(individuals, results_dir, behavior_prob, max_durations, da
     annotations_df.to_csv(annotations_path, index=False)
 
 
-def simulate_markov_acc_day(data_constants, transition_matrix, avg_durations):
+def simulate_markov_acc_day(data_constants, transition_matrix, avg_durations, tau=0.1):
     
     """
     Simulate a half-day of tri-axial acceleration data using a Markov process 
@@ -292,7 +292,7 @@ def simulate_markov_acc_day(data_constants, transition_matrix, avg_durations):
                 (data_constants["Axis"] == axis), ['f', 'A', 'phi', 'sigma']
             ].values[0]
             
-            return simulate_axis_signal(f, A, phi, sigma, n_samples)
+            return simulate_axis_signal(f, A, phi, sigma, n_samples, tau=tau)
         
         acc_x = get_signal("X") 
         acc_y = get_signal("Y") 
