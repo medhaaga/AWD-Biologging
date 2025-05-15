@@ -4,15 +4,12 @@ __pycache__/
 *$py.class
 
 # data & logs
-*.json
-*.npy
+
 *.p
 *.csv
 *.log
 *.wav
-*.npz
 *.pth 
-*.pt
 *.png
 *.pdf
 *.yaml

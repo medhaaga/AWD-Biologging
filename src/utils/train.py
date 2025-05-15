@@ -136,7 +136,7 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
         avg_train_losses.append(avg_train_loss)
         avg_test_losses.append(val_loss)
 
-        progress_bar.set_description(f"Epoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f}")
+        progress_bar.set_description(f"Epoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f} | Best val Loss: {best_val_loss:.4f}")
 
 
         if args.verbose and (epoch == 0 or (epoch+1)%10 == 0):

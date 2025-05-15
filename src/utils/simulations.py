@@ -67,12 +67,12 @@ def simulate_fourier_signal(frequencies, amplitudes, phases, n_samples, fs):
     
     return signal
 
-def simulate_axis_signal(f, A, phi, sigma, n_samples):
+def simulate_axis_signal(f, A, phi, sigma, n_samples, tau=0.1):
 
-    f = [freq + np.random.uniform(-0.1, 0.1) for freq in list(f)]
-    A = [amp + np.random.uniform(-0.1, 0.1) for amp in list(A)]
-    phi = [ph + np.random.uniform(-0.1, 0.1) for ph in list(phi)]
-    sigma = sigma + np.random.uniform(-0.1, 0.1, size=n_samples)
+    f = [freq + np.random.uniform(-tau, tau) for freq in list(f)]
+    A = [amp + np.random.uniform(-tau, tau) for amp in list(A)]
+    phi = [ph + np.random.uniform(-tau, tau) for ph in list(phi)]
+    sigma = sigma + np.random.uniform(-tau, tau, size=n_samples)
 
     signal = simulate_fourier_signal(f, A, phi, n_samples, config.SAMPLING_RATE)
     signal += np.random.normal(loc=0, scale=sigma)
@@ -369,7 +369,7 @@ def plot_simulated_day(acc_df):
     plt.tight_layout()
     plt.show()
 
-def generate_dataset(data_constants, class_distribution, window_length, n_samples, wrong_behavior=False, wrong_behavior_prob=0.4):
+def generate_dataset(data_constants, class_distribution, window_length, n_samples, wrong_behavior=False, wrong_behavior_prob=0.4, tau=0.1):
     behaviors = list(class_distribution.keys())
     probabilities = list(class_distribution.values())
 
@@ -382,7 +382,7 @@ def generate_dataset(data_constants, class_distribution, window_length, n_sample
                             (data_constants["Axis"] == i), ['f', 'A', 'phi', 'sigma']
                         ].values[0]
 
-            signal.append(simulate_axis_signal(f, A, phi, sigma, window_length))
+            signal.append(simulate_axis_signal(f, A, phi, sigma, window_length, tau=tau))
 
         return np.vstack(signal)
     
