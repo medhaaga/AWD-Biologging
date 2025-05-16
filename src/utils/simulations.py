@@ -9,7 +9,7 @@ from scipy.stats import skew, kurtosis
 from scipy.stats import linregress
 from scipy.stats import circvar
 from scipy.spatial.distance import cdist
-
+import seaborn as sns
 sys.path.append('.')
 sys.path.append('../')
 sys.path.append('../../')
@@ -327,47 +327,56 @@ def simulate_markov_acc_day(data_constants, transition_matrix, avg_durations, ta
     annotations_df = pd.DataFrame(behavior_annotations, columns=["id", "Behavior", "Timestamp_start", "Timestamp_end", "Source"])
     return acc_df, annotations_df
 
-def plot_simulated_day(acc_df):
-    # Ensure timestamp is datetime
+def plot_simulated_day(acc_df, plot_path=None):
     acc_df['Timestamp'] = pd.to_datetime(acc_df['Timestamp'])
 
-    # Plot signal
-    fig, ax = plt.subplots(figsize=(15, 5))
-    ax.plot(acc_df['Timestamp'], acc_df['Acc X [g]'], label='X Signal', color='black', linewidth=.5, alpha=0.5)
-    ax.plot(acc_df['Timestamp'], acc_df['Acc Y [g]'], label='Y Signal', color='blue', linewidth=.5, alpha=0.5)
-    ax.plot(acc_df['Timestamp'], acc_df['Acc Z [g]'], label='Z Signal', color='maroon', linewidth=.5, alpha=0.5)
+    fig, ax = plt.subplots(figsize=(15, 7))
 
+    # Plot X, Y, Z signals and store their handles
+    signal_handles = []
+    signal_handles.append(ax.plot(acc_df['Timestamp'], acc_df['Acc X [g]'], label='X', color='black', linewidth=.5, alpha=0.5)[0])
+    signal_handles.append(ax.plot(acc_df['Timestamp'], acc_df['Acc Y [g]'], label='Y', color='blue', linewidth=.5, alpha=0.5)[0])
+    signal_handles.append(ax.plot(acc_df['Timestamp'], acc_df['Acc Z [g]'], label='Z', color='maroon', linewidth=.5, alpha=0.5)[0])
 
-    # Get start and end indices for each behavior block
+    # Behavior segmenting
     acc_df['behavior_shift'] = acc_df['Behavior'].shift()
     acc_df['change'] = acc_df['Behavior'] != acc_df['behavior_shift']
     change_indices = acc_df.index[acc_df['change']].tolist() + [acc_df.index[-1] + 1]
 
-    # Pick distinct colors for behaviors
-    import seaborn as sns
+    # Unique color for each behavior
     colors = dict(zip(acc_df['Behavior'].unique(), sns.color_palette("Set2", acc_df['Behavior'].nunique())))
 
-    # Mark regions using axvspan
+    behavior_labels_used = set()
+    behavior_handles = []
+
     for start_idx, end_idx in zip(change_indices[:-1], change_indices[1:]):
         row = acc_df.iloc[start_idx]
         behavior = row['Behavior']
         color = colors[behavior]
-        ax.axvspan(acc_df.loc[start_idx, 'Timestamp'], acc_df.loc[end_idx - 1, 'Timestamp'],
-                alpha=0.3, color=color, label=behavior)
 
-    # Format x-axis and legend
+        # Only label the first time each behavior appears
+        label = behavior if behavior not in behavior_labels_used else None
+        span = ax.axvspan(acc_df.loc[start_idx, 'Timestamp'], acc_df.loc[end_idx - 1, 'Timestamp'],
+                          alpha=0.3, color=color, label=label)
+        if label:
+            behavior_handles.append(span)
+            behavior_labels_used.add(behavior)
+
+    # Format axis
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
     ax.set_xlabel('Time')
-    ax.set_ylabel('Signal')
-    ax.set_title('Signal over Time with Behavior Annotations')
+    ax.set_ylabel('Amplitude [g]')
+    ax.set_title('24 Hours of Simulated Acceleration Signal and Behavior Annotations')
 
-    # To avoid duplicate labels in legend
-    handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
-    ax.legend(by_label.values(), by_label.keys(), loc='lower center', ncol=3, bbox_to_anchor=(0.5, -1.2))
-
+    # Create legends
+    legend1 = ax.legend(handles=signal_handles, loc='upper left')
+    ax.add_artist(legend1)  # Add first legend manually
+    ax.legend(handles=behavior_handles, loc='lower center', ncol=5, bbox_to_anchor=(0.5, -0.7))
     plt.tight_layout()
     plt.show()
+    if plot_path is not None:
+        plt.savefig(plot_path, dpi=300)
+
 
 def generate_dataset(data_constants, class_distribution, window_length, n_samples, wrong_behavior=False, wrong_behavior_prob=0.4, tau=0.1):
     behaviors = list(class_distribution.keys())

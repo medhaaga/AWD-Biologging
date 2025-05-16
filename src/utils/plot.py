@@ -146,16 +146,16 @@ def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=Tru
         sns.heatmap(cm, annot=True, fmt=".2f", cmap="Blues", 
                     xticklabels=class_names, yticklabels=class_names,
                     cbar=False, square=True, linewidths=0,
-                    annot_kws={"size": 25},)
+                    annot_kws={"size": 30},)
 
-        ax.set_xlabel("Predicted Label", fontsize=25, labelpad=20)
-        ax.set_ylabel("True Label", fontsize=25, labelpad=20)
+        ax.set_xlabel("Predicted Label", fontsize=30, labelpad=20)
+        ax.set_ylabel("True Label", fontsize=30, labelpad=20)
         ax.set_xticklabels(class_names, fontsize=25, rotation=90)
         ax.set_yticklabels(class_names, fontsize=25, rotation=0)
 
         plt.tight_layout()
         if plot_path:
-            plt.savefig(plot_path, format="pdf", bbox_inches="tight")
+            plt.savefig(plot_path, format="png", bbox_inches="tight")
         plt.show()
     
     if return_accuracy:
@@ -209,7 +209,6 @@ def plot_online_predictions(online_avg, window_length, hope_length, window_durat
     plt.show()
 
 
-
 def plot_signal_and_online_predictions(time, signal, online_avg, window_length, hop_length, window_duration, label_encoder, sampling_rate=16, plot_dir=None, half_day_behaviors=None):
     """
     Plots the raw signal and the online predictions.
@@ -257,7 +256,6 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     cbar_ax = fig.add_subplot(gs[1, 1])
 
     # Plot the signal
-    signal_x = signal[0,0,:]
     ax_signal.plot(time, signal[0,0,:], label='X Signal', color='black', linewidth=.5, alpha=0.6)
     ax_signal.plot(time, signal[0,1,:], label='Y Signal', color='blue', linewidth=.5, alpha=0.5)
     ax_signal.plot(time, signal[0,2,:], label='Z Signal', color='maroon', linewidth=.5, alpha=0.4)
@@ -290,7 +288,7 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
 
     # Add colorbar to the scatter plot, placed in the separate axis
     cbar = plt.colorbar(scatter, cax=cbar_ax)
-    cbar.set_label('Probability', fontsize=25)
+    cbar.set_label('Softmax Score', fontsize=25)
 
     # Adjust layout to fit everything
     plt.tight_layout(rect=[0, 0, 2.9, 1])  # Reduce right space for colorbar
@@ -299,8 +297,11 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     if plot_dir is not None:
         if not os.path.exists(plot_dir):
             os.makedirs(plot_dir)  # Create directory if it doesn't exist
-        plt.savefig(os.path.join(plot_dir, f'window_length_{window_length}.png'))
+        plt.savefig(os.path.join(plot_dir, f'window_length_{window_length}.png'), dpi=300)
     
     plt.show()
 
     return fig, (ax_signal, ax_online)
+
+from matplotlib import gridspec
+from matplotlib.lines import Line2D
