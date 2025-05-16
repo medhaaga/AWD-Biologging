@@ -37,7 +37,7 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
     X = X[:, :, (X.shape[2] - window_length) % hop_length : ]
 
 
-    for i in range(1 + (X.shape[2] - window_length)//hop_length):
+    for i in range(2 + (X.shape[2] - window_length)//hop_length):
         X_temp = X[:, :, i*hop_length : i*hop_length+window_length]
         
         with torch.no_grad():
@@ -51,9 +51,7 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
 
 def online_smoothening(scores, window_len, hop_len):
 
-    truncate = window_len + hop_len*((scores.shape[-1] - window_len)//hop_len)
     scores = scores.reshape(-1,scores.shape[-1])
-    scores = scores[:,:truncate]
     n_windows = 1+ (scores.shape[-1] - window_len)//hop_len
 
     online_avg = np.zeros((scores.shape[0], n_windows))

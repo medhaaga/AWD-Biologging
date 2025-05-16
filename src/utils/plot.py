@@ -146,12 +146,12 @@ def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=Tru
         sns.heatmap(cm, annot=True, fmt=".2f", cmap="Blues", 
                     xticklabels=class_names, yticklabels=class_names,
                     cbar=False, square=True, linewidths=0,
-                    annot_kws={"size": 20},)
+                    annot_kws={"size": 25},)
 
         ax.set_xlabel("Predicted Label", fontsize=25, labelpad=20)
         ax.set_ylabel("True Label", fontsize=25, labelpad=20)
-        ax.set_xticklabels(class_names, fontsize=20, rotation=90)
-        ax.set_yticklabels(class_names, fontsize=20, rotation=0)
+        ax.set_xticklabels(class_names, fontsize=25, rotation=90)
+        ax.set_yticklabels(class_names, fontsize=25, rotation=0)
 
         plt.tight_layout()
         if plot_path:
