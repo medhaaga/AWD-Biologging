@@ -1,5 +1,5 @@
 import numpy as np
-
+import copy
 # Torch
 import torch
 import torch.nn.functional as F
@@ -126,6 +126,8 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
 
         t1 = time.time()
 
+        model.eval()
+
         with torch.no_grad():
             val_loss, val_true_classes, val_predictions, val_scores = multi_label_eval_loop(model, criterion, val_dataloader, device=device)
 
@@ -138,13 +140,20 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
                 test_loss, test_true_classes, test_predictions, test_scores = multi_label_eval_loop(model, criterion, test_dataloader, device=device)
 
             best_val_loss, best_val_predictions, best_val_scores = val_loss, val_predictions, val_scores
+            best_model_state_dict = copy.deepcopy(model.state_dict())
+            best_test_outputs = {
+                'test_true_classes': test_true_classes,
+                'test_predictions': test_predictions,
+                'test_scores': test_scores
+            }
+
             return_dict = {'model': model,
                             'test_true_classes': test_true_classes,
                             'test_predictions': test_predictions,
                             'test_scores': test_scores,
                             'val_true_classes': val_true_classes,
-                            'val_predictions': val_predictions,
-                            'val_scores': val_scores
+                            'val_predictions': best_val_predictions,
+                            'val_scores': best_val_scores
                             } 
 
         
@@ -155,7 +164,6 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
         avg_test_losses.append(val_loss)
 
         progress_bar.set_description(f"Epoch {epoch+1}/{epochs} | Train Loss: {avg_train_loss:.4f} | Val Loss: {val_loss:.4f} | Best val Loss: {best_val_loss:.4f}")
-
 
         if args.verbose and (epoch == 0 or (epoch+1)%10 == 0):
             print("")
@@ -177,6 +185,19 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
     end_time = time.time()
     print(f'Total training time: {utils_io.format_time(end_time-start_time)}')   
 
-    return_dict['training_stats'] = training_stats
+    # Restore best model state
+    if best_model_state_dict is not None:
+        model.load_state_dict(best_model_state_dict)
+
+    return_dict.update({
+        'model': model,
+        'training_stats': training_stats,
+        'test_true_classes': best_test_outputs['test_true_classes'],
+        'test_predictions': best_test_outputs['test_predictions'],
+        'test_scores': best_test_outputs['test_scores'],
+        'val_true_classes': val_true_classes,
+        'val_predictions': best_val_predictions,
+        'val_scores': best_val_scores
+    })
 
     return return_dict
