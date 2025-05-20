@@ -29,7 +29,9 @@ from src.utils.io import (format_time,
                           get_results_path,
                           get_metadata_path,
                           get_video_labels_path,
-                          get_audio_labels_path)
+                          get_audio_labels_path,
+                          get_matched_data_path,
+                          get_matched_metadata_path)
 
 from src.methods.prediction_model import create_dynamic_conv_model
 
@@ -59,8 +61,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment_name", type=str, default='no_split', choices=['no_split', 'interdog', 'interyear', 'interAMPM'])
     parser.add_argument("--kernel_size", type=int, default=5, help="size fo kernel for CNN")
-    parser.add_argument("--n_channels", type=int, default=32, help="number of output channels for the first CNN layer")
-    parser.add_argument("--n_CNNlayers", type=int, default=5, help="number of convolution layers")
+    parser.add_argument("--n_channels", type=int, default=64, help="number of output channels for the first CNN layer")
+    parser.add_argument("--n_CNNlayers", type=int, default=3, help="number of convolution layers")
     parser.add_argument("--window_duration_percentile", type=int, default=50, help="audio duration cutoff percentile")
     parser.add_argument("--num_epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=64)
@@ -75,7 +77,7 @@ def parse_arguments():
     parser.add_argument("--cutoff_frequency", type=float, default=0)
     parser.add_argument("--cutoff_order", type=int, default=5)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--theta", type=float, default=0.8)
+    parser.add_argument("--theta", type=float, default=0.7)
     parser.add_argument("--match", type=int, default=0, help="should the matching be done or use pre-matched observations?")
     parser.add_argument("--min_duration", type=float, default=1.0, help="minimum duration of a behavior in seconds so that it is not discarded")
     parser.add_argument("--create_class_imbalance", type=int, default=0, help="whether to create class imbalance artificially")
@@ -106,10 +108,10 @@ if __name__ == '__main__':
     # loading data and creating train/test split
     ##############################################
 
-    if os.path.exists(VECTRONICS_METADATA_PATH):
-        metadata = pd.read_csv(VECTRONICS_METADATA_PATH) # load metadata
-    elif os.path.exists(get_metadata_path()):
+    if os.path.exists(get_metadata_path()):
         metadata = pd.read_csv(get_metadata_path()) # load metadata
+    elif os.path.exists(VECTRONICS_METADATA_PATH):
+        metadata = pd.read_csv(VECTRONICS_METADATA_PATH) # load metadata
     else:
         raise FileNotFoundError("The metadata not found.")
 
@@ -131,7 +133,9 @@ if __name__ == '__main__':
                                                                                                     COLLAPSE_BEHAVIORS_MAPPING, 
                                                                                                     BEHAVIORS, 
                                                                                                     args, 
-                                                                                                    reuse_behaviors=BEHAVIORS) 
+                                                                                                    reuse_behaviors=BEHAVIORS,
+                                                                                                    acc_data_path=get_matched_data_path(),
+                                                                                                    acc_metadata_path=get_matched_metadata_path()) 
     
     
     if args.create_class_imbalance:

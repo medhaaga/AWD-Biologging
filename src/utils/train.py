@@ -102,6 +102,15 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
     avg_train_losses, avg_test_losses = [], []
     best_val_loss = 100
     training_stats = []
+    return_dict = {'model': None,
+                    'training_stats': None,
+                    'test_true_classes': None,
+                    'test_predictions': None,
+                    'test_scores': None,
+                    'val_true_classes': None,
+                    'val_predictions': None,
+                    'val_scores': None
+                    } 
 
     start_time = time.time()
 
@@ -129,6 +138,15 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
                 test_loss, test_true_classes, test_predictions, test_scores = multi_label_eval_loop(model, criterion, test_dataloader, device=device)
 
             best_val_loss, best_val_predictions, best_val_scores = val_loss, val_predictions, val_scores
+            return_dict = {'model': model,
+                            'test_true_classes': test_true_classes,
+                            'test_predictions': test_predictions,
+                            'test_scores': test_scores,
+                            'val_true_classes': val_true_classes,
+                            'val_predictions': val_predictions,
+                            'val_scores': val_scores
+                            } 
+
         
         # save train and test loss every 10 epochs 
         
@@ -159,12 +177,6 @@ def train_run(model, optimizer, criterion, train_dataloader, val_dataloader, tes
     end_time = time.time()
     print(f'Total training time: {utils_io.format_time(end_time-start_time)}')   
 
-    return {'model': model,
-            'training_stats': training_stats,
-            'test_true_classes': test_true_classes,
-            'test_predictions': test_predictions,
-            'test_scores': test_scores,
-            'val_true_classes': val_true_classes,
-            'val_predictions': val_predictions,
-            'val_scores': val_scores
-            } 
+    return_dict['training_stats'] = training_stats
+
+    return return_dict
