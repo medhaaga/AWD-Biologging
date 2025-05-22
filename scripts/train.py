@@ -22,8 +22,7 @@ from torch.utils.data import TensorDataset, DataLoader
 
 # Script imports
 
-from src.utils.train import (training_loop,
-                             multi_label_eval_loop)
+from src.utils.train import (train_run)
 
 from src.utils.io import (format_time,
                           get_results_path,
@@ -83,6 +82,7 @@ def parse_arguments():
     parser.add_argument("--create_class_imbalance", type=int, default=0, help="whether to create class imbalance artificially")
     parser.add_argument("--class_imbalance_percent", type=float, default=0.01, help="percetage of feeding behavior in the imbalanced dataset")
     parser.add_argument("--alpha", type=float, default=0.05, help="coverage for RAPS is 1-alpha")
+    parser.add_argument("--verbose", type=int, default=0, help="whether to print training logs")
 
     return parser
 
@@ -181,95 +181,33 @@ if __name__ == '__main__':
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 
-    #############################################
-    ###### Training & Saving 
-    ##############################################
+    train_obj = train_run(model, optimizer, criterion, train_dataloader, val_dataloader, test_dataloader, args, device)
+    model = train_obj['model']
+    training_stats = train_obj['training_stats']
 
-    # Train
-
-    epochs = args.num_epochs
-
-    avg_train_losses, avg_test_losses = [], []
-    best_val_loss = 100
-    training_stats = []
-
-    print("")
-    print("Training...")
-    print("=============================")
-
-    start_time = time.time()
-
-    for epoch in tqdm(range(epochs)):
-
-        model.train()
-
-        t0 = time.time()
-
-        total_train_loss = training_loop(model, optimizer, criterion, train_dataloader, device=device)
-
-        t1 = time.time()
-
-        with torch.no_grad():
-            val_loss, val_true_classes, val_predictions, val_scores = multi_label_eval_loop(model, criterion, val_dataloader, device=device)
-
-        t2 = time.time()
-        
-        if val_loss < best_val_loss:
-
-            # calculate test scores
-            with torch.no_grad():
-                test_loss, test_true_classes, test_predictions, test_scores = multi_label_eval_loop(model, criterion, test_dataloader, device=device)
-
-            best_val_loss, best_val_predictions, best_val_scores = val_loss, val_predictions, val_scores
-            
-            # Save the model.
-            torch.save(model, os.path.join(dir, 'model.pt'))
-
-        
-        # save train and test loss every 10 epochs 
-        
-        avg_train_loss = total_train_loss/len(train_dataloader)
-        avg_train_losses.append(avg_train_loss)
-        avg_test_losses.append(val_loss)
-
-        if (epoch+1)%10 == 0:
-            print("")
-            print(f'========= Epoch {epoch+1}/{epochs} ==========')
-            print(f"Average train loss: {avg_train_loss}")
-            print(f" Average val loss: {val_loss}")    
-            print(f" Best val loss: {best_val_loss}, best test loss: {test_loss}")   
-
-        training_stats.append(
-        {
-            "epoch": epoch + 1,
-            "Training Loss": avg_train_loss,
-            "Validation Loss": val_loss,
-            "Training Time": format_time(t1 - t0),
-            "Validation Time": format_time(t2 - t1),
-        }
-        ) 
-
-    end_time = time.time()
-    print("")
-    print("=======================")
-    print(f'Total training time: {format_time(end_time-start_time)}')    
 
     #############################################
     ###### Save objects
     ##############################################
 
-    # save true and predicted test classes along with test metadata
-    np.save(os.path.join(dir, 'test_true_classes.npy'), test_true_classes)
-    np.save(os.path.join(dir, 'test_predictions.npy'), test_predictions)
-    np.save(os.path.join(dir, 'test_scores.npy'), test_scores)
-    z_test.to_csv(os.path.join(dir, 'test_metadata.csv'))
+    torch.save(model, os.path.join(dir, 'model.pt'))
+    json_training_stats_file = os.path.join(dir, 'training_stats.json')
+    with open(json_training_stats_file, 'w') as f:
+        json.dump(training_stats, f)
 
     # save true and predicted validation classes along with val metadata
-    np.save(os.path.join(dir, 'val_true_classes.npy'), val_true_classes)
-    np.save(os.path.join(dir, 'val_predictions.npy'), best_val_predictions)
-    np.save(os.path.join(dir, 'val_scores.npy'), best_val_scores)
-    z_val.to_csv(os.path.join(dir, 'val_metadata.csv'))        
-    
+    np.save(os.path.join(dir, 'val_true_classes.npy'),  train_obj['val_true_classes'])
+    np.save(os.path.join(dir, 'val_predictions.npy'),  train_obj['val_predictions'])
+    np.save(os.path.join(dir, 'val_scores.npy'),  train_obj['val_scores'])
+    z_test.to_csv(os.path.join(dir, 'val_metadata.csv'))
+
+
+    # save true and predicted validation classes along with val metadata
+    np.save(os.path.join(dir, 'test_true_classes.npy'),  train_obj['test_true_classes'])
+    np.save(os.path.join(dir, 'test_predictions.npy'),  train_obj['test_predictions'])
+    np.save(os.path.join(dir, 'test_scores.npy'),  train_obj['test_scores'])
+    z_test.to_csv(os.path.join(dir, 'test_metadata.csv'))
+
     # Save the experiment configuration to JSON file
     json_config_file = os.path.join(dir, "train_config.json")
     with open(json_config_file, 'w') as f:
@@ -279,11 +217,6 @@ if __name__ == '__main__':
     json_config_file = os.path.join(dir, "test_config.json")
     with open(json_config_file, 'w') as f:
         json.dump(test_filter_profile, f)
-
-    # Save the experiment training stats to JSON file
-    json_training_stats_file = os.path.join(dir, 'training_stats.json')
-    with open(json_training_stats_file, 'w') as f:
-        json.dump(training_stats, f)
 
     #############################################
     ###### Fit the conformal model
