@@ -289,7 +289,7 @@ if __name__ == '__main__':
     ###### Fit the conformal model
     ##############################################
 
-    model = torch.load(os.path.join(dir, 'model.pt'))
+    model = torch.load(os.path.join(dir, 'model.pt'), weights_only=False)
     cdataloader = DataLoader(TensorDataset(torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val)), batch_size=args.batch_size, shuffle=False)
     cmodel = ConformalModel(model, cdataloader, alpha=args.alpha, lamda_criterion='size').to(device)
     torch.save(cmodel, os.path.join(dir, 'cmodel.pt'))
