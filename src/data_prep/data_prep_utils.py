@@ -39,10 +39,18 @@ def combined_annotations(video_path, audio_path, id_mapping):
     botswana_timezone = 'Africa/Gaborone'
     video_annotations['Timestamp_start'] = pd.to_datetime(video_annotations['Timestamp_start'], format='%Y/%m/%d %H:%M:%S')
     video_annotations['Timestamp_end'] = pd.to_datetime(video_annotations['Timestamp_end'], format='%Y/%m/%d %H:%M:%S')
+
+    # localize to botswana time and the change clock time to utc
     video_annotations['Timestamp_start'] = video_annotations['Timestamp_start'].apply(lambda x: x.tz_localize(botswana_timezone).tz_convert('UTC'))
     video_annotations['Timestamp_end'] = video_annotations['Timestamp_end'].apply(lambda x: x.tz_localize(botswana_timezone).tz_convert('UTC'))
+    
+    # now remove time zone information
     video_annotations['Timestamp_start'] = video_annotations['Timestamp_start'].dt.tz_localize(None)
     video_annotations['Timestamp_end'] = video_annotations['Timestamp_end'].dt.tz_localize(None)
+
+    # make sure timestamp is in a given format
+    video_annotations['Timestamp_start'] = video_annotations['Timestamp_start'].dt.strftime('%Y/%m/%d %H:%M:%S')
+    video_annotations['Timestamp_end'] = video_annotations['Timestamp_end'].dt.strftime('%Y/%m/%d %H:%M:%S')
 
 
     all_annotations = pd.concat([video_annotations[annotations_columns], audio_annotations[annotations_columns]])

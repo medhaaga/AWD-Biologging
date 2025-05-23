@@ -100,7 +100,7 @@ def create_matched_data(filtered_metadata, annotations, verbose=True):
         individual_annotations['Timestamp_start'] = pd.to_datetime(annotations_orig['Timestamp_start'], format='%Y/%m/%d %H:%M:%S')
         individual_annotations['Timestamp_end'] = pd.to_datetime(annotations_orig['Timestamp_end'], format='%Y/%m/%d %H:%M:%S')
         individual_annotations['date'] = individual_annotations['Timestamp_start'].dt.date
-        individual_annotations['am/pm'] = pd.to_datetime(individual_annotations['Timestamp_start'], format="%Y/%m/%d %H:%M:%S").dt.strftime('%p') 
+        individual_annotations['am/pm'] = pd.to_datetime(individual_annotations['Timestamp_start'], format="%Y/%m/%d %H:%M:%S").dt.strftime('%p').str.lower() 
         individual_annotations['half day [yyyy-mm-dd_am/pm]'] = individual_annotations['date'].astype(str) + '_' + individual_annotations['am/pm']
         
         # create submetadata file for this individual
