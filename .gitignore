@@ -13,8 +13,10 @@ __pycache__/
 *.png
 *.pdf
 *.yaml
-
-# C extensions
+*.pth
+*.npy
+*.json
+*.pt
 *.so
 
 # Distribution / packaging
