@@ -65,6 +65,7 @@ TEST_METADATA_PATH = TEST_ROOT_DIR+"/test_metadata.csv"
 TEST_VIDEO_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_video_labels_annotations.csv"
 TEST_AUDIO_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_audio_labels_annotations.csv"
 TEST_ANNOTATIONS_PATH = TEST_ROOT_DIR+"/test_all_annotations.csv"
+TEST_BEHAVIOR_EVAL_PATH = TEST_ROOT_DIR+"/behavior_evaluations"
 
 sim_constants = [
     
