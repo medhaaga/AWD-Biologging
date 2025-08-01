@@ -16,4 +16,5 @@ from .settings import (VECTRONICS_BEHAVIOR_EVAL_PATH,
                        TEST_ANNOTATIONS_PATH,
                        SIM_BEHAVIORS,
                        SIMULATION_CONSTANTS,
+                       QUICKSTART_CONSTANTS,
                        WRONG_BEHAVIORS)

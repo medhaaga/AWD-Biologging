@@ -34,7 +34,7 @@ def process_chunk_vectronics(chunk, individual, file_dir, verbose=False):
     chunk['date_am_pm_id'] = pd.to_datetime(chunk['UTC Date[mm/dd/yyyy]'], format='%m/%d/%Y').dt.date.astype(str) + '_' + pd.to_datetime(chunk['UTC DateTime'], format="%H:%M:%S").dt.strftime('%p') 
 
     unique_half_days = chunk['date_am_pm_id'].unique()
-    print(f"{'Number of half days in chunk:':<30} {len(unique_half_days)}, chunk duration: {len(chunk)/(config.SAMPLING_RATE * 3600)}")
+    print(f"{'Half days in chunk:':<30} {(unique_half_days)}, chunk duration: {len(chunk)/(config.SAMPLING_RATE * 3600)}")
 
     for x in unique_half_days:        
         df = chunk[chunk['date_am_pm_id'] == x]
@@ -75,10 +75,10 @@ def combine_acc_vectronics(individual, acc_filepaths, max_chunks=0, verbose=Fals
 
         file_dir = os.path.join(os.path.dirname(path), 'combined_acc')
         os.makedirs(file_dir, exist_ok=True)
-        for filename in os.listdir(file_dir):
-            file_path = os.path.join(file_dir, filename)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
+        # for filename in os.listdir(file_dir):
+        #     file_path = os.path.join(file_dir, filename)
+        #     if os.path.isfile(file_path):
+        #         os.remove(file_path)
 
         chunk_size = 10**6  # Adjust the chunk size based on your available memory
         num_chunks = 0

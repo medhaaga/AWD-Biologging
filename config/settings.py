@@ -97,3 +97,35 @@ WRONG_BEHAVIORS = {'Feeding': 'Feeding',
                     'Moving': 'Feeding', 
                     'Resting': 'Vigilant', 
                     'Vigilant': 'Resting'}
+
+quickstart_constants = [
+    
+    # Feeding — bring down the amplitude and overlap with Moving
+    ("Feeding", "X", (1.0, 3.0, 5.0), (1.0, 2.0, 3.0), (0.2, 0.7, 1.2), 1.0),
+    ("Feeding", "Y", (2.0, 3.0, 4.0), (2.0, 3.0, 4.0), (0.3, 0.8, 1.3), 1.0),
+    ("Feeding", "Z", (3.5, 4.5, 5.5), (3.5, 4.5, 5.5), (0.4, 0.9, 1.4), 1.0),
+
+    # Moving — slightly reduce amplitude, overlap more with Feeding
+    ("Moving", "X", (1.4, 3.4, 5.4), (1.4, 3.4, 5.4), (0.6, 1.2, 1.8), 1.0),
+    ("Moving", "Y", (2.4, 3.4, 4.4), (2.4, 3.4, 4.4), (0.5, 1.0, 1.5), 1.0),
+    ("Moving", "Z", (3.1, 4.1, 5.1), (3.1, 4.1, 5.1), (0.7, 1.2, 1.8), 1.0),
+
+    # Resting — make it slightly jittery to overlap with Vigilant
+    ("Resting", "X", (0.5, 1.0, 1.5), (0.5, 1.0, 1.5), (0.0, 0.1, 0.2), 0.5),
+    ("Resting", "Y", (1.0, 1.5, 2.0), (1.0, 1.5, 2.0), (0.0, 0.1, 0.2), 0.5),
+    ("Resting", "Z", (1.5, 2.0, 2.5), (1.5, 2.0, 2.5), (0.0, 0.1, 0.2), 0.5),
+
+    # Running — make it slightly jittery to overlap with Vigilant
+    ("Running", "X", (1.5, 2.0, 3.5), (1.5, 2.0, 2.5), (0.0, 0.1, 0.2), 0.5),
+    ("Running", "Y", (2.0, 2.5, 2.0), (2.0, 2.5, 3.0), (0.0, 0.1, 0.2), 0.5),
+    ("Running", "Z", (2.5, 3.0, 3.5), (2.5, 3.0, 3.5), (0.0, 0.1, 0.2), 0.5),
+
+    # Vigilant — lower the amplitude and raise noise to blur with Resting
+    ("Vigilant", "X", (0.8, 1.3, 1.8), (0.8, 1.3, 1.8), (0.0, 0.3, 0.6), 0.5),
+    ("Vigilant", "Y", (0.7, 1.2, 1.7), (0.7, 1.2, 1.7), (0.0, 0.4, 0.8), 0.5),
+    ("Vigilant", "Z", (1.8, 2.3, 2.8), (1.8, 2.3, 2.8), (0.0, 0.5, 1.0), 0.5),
+]
+
+QUICKSTART_CONSTANTS = pd.DataFrame(quickstart_constants, columns=[
+    "Behavior", "Axis", "f", "A", "phi", "sigma"
+])
