@@ -208,6 +208,7 @@ def plot_online_predictions(online_avg, window_length, hope_length, window_durat
     plt.tight_layout()
     plt.show()
 
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 def plot_signal_and_online_predictions(time, signal, online_avg, window_length, hop_length, window_duration, label_encoder, sampling_rate=16, plot_dir=None, half_day_behaviors=None):
     """
@@ -262,6 +263,8 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     ax_signal.set_xlabel('Time (h)')
     ax_signal.set_ylabel("Amplitude (g)")
     ax_signal.set_title("Raw Signal along X axis")
+    ax_signal.xaxis.set_major_locator(MultipleLocator(1))  # 1 hour intervals
+    ax_signal.xaxis.set_major_formatter(FormatStrFormatter('%d'))  # Show as integer hours
 
 
     # Plot behaviors

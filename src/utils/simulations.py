@@ -364,7 +364,7 @@ def plot_simulated_day(acc_df, plot_path=None):
             behavior_labels_used.add(behavior)
 
     # Format axis
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H'))
     ax.set_xlabel('Time')
     ax.set_ylabel('Amplitude [g]')
     # ax.set_title('24 Hours of Simulated Acceleration Signal and Behavior Annotations')

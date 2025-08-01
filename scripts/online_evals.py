@@ -154,7 +154,7 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
 
     return signal, scores, online_avg
 
-def all_online_eval(model_config, device, sampling_frequency=16, window_length=None, window_duration=None):
+def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, window_length=None, window_duration=None, eval_path=None):
 
     if (window_length is None) & (window_duration is None):
         raise ValueError('A window length/duratioon for the classification model is required.')
@@ -165,21 +165,17 @@ def all_online_eval(model_config, device, sampling_frequency=16, window_length=N
     if (window_length is not None) & (window_duration is not None):
         assert window_length == int(window_duration*sampling_frequency), "window length and window duration are not compatible according to provided sampling frequency."
     
-    # load the conformal model
-    model_dir = get_results_path(
-        model_config['experiment_name'], 
-        model_config['n_CNNlayers'], 
-        model_config['n_channels'], 
-        model_config['kernel_size'], 
-        model_config['theta']
-    )
+
     # check if model and window duration are compatible
     cmodel = torch.load(os.path.join(model_dir, 'cmodel.pt')).to(device)
     zero_signal = torch.zeros(1, 3, window_length).to(device)
     assert cmodel.model[:-2](zero_signal).shape[-1] == cmodel.model[-2].in_features, "Window duration and model not compatible"
 
-    # load metadata for access to all half days    
-    metadata = pd.read_csv(VECTRONICS_METADATA_PATH) 
+    # load metadata for access to all half days   
+    try: 
+        metadata = pd.read_csv(VECTRONICS_METADATA_PATH) 
+    except Exception as e:
+        print(f"Metadata path cannot be '{metadata_path}': {e}")
 
     # fit the label encoder
     label_encoder = LabelEncoder()
@@ -234,8 +230,12 @@ def all_online_eval(model_config, device, sampling_frequency=16, window_length=N
         half_day_online_evals['Eating'] = half_day_online_evals['Prediction sets'].apply(lambda behaviors: 'Eating' in behaviors).astype('int')
         half_day_online_evals['Running'] = half_day_online_evals['Prediction sets'].apply(lambda behaviors: 'Running' in behaviors).astype('int')
 
-
-        save_dir = os.path.join(VECTRONICS_BEHAVIOR_EVAL_PATH, os.path.basename(row['file path']))
+        try:
+            os.makedirs(eval_path, exist_ok=True)
+        except Exception as e:
+            print(f"Eval path cannot be '{path}': {e}")
+        
+        save_dir = os.path.join(eval_path, os.path.basename(row['file path']))
         half_day_online_evals.to_csv(save_dir, index=False)
     
 
