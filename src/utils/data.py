@@ -427,7 +427,8 @@ def setup_multilabel_dataloaders(X_train, y_train, X_val, y_val, X_test, y_test,
     n_outputs = len(np.unique(np.concatenate((y_train, y_val, y_test))))
     
     weights = give_balanced_weights(args.theta, y_train)
-    y_weights = torch.tensor([weights[i] for i in y_train], dtype=torch.float32)
+    sample_weights = np.unique(y_train, return_counts=True)[1]
+    y_weights = torch.tensor([weights[i]/sample_weights[i] for i in y_train], dtype=torch.float32)
     sampler = WeightedRandomSampler(y_weights, len(y_weights))
 
     # converting to one-hot vectors

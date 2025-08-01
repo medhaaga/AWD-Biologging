@@ -3,9 +3,8 @@
 # Parameters
 kernels=(5)
 n_channels=(64)
-n_CNNlayers=(5)
-thetas=(0.0)
-window_duration_percentile=(10 20 30 40 50 60 70 80 90 100)
+n_CNNlayers=(3)
+thetas=(0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0)
 
 device=3
 padding="repeat"
@@ -14,6 +13,7 @@ experiment_name="no_split"
 num_epochs=100
 match=0
 batch_size=512
+window_duration_percentile=50
 
 # Iterate over combinations
 for theta in "${thetas[@]}"; do
