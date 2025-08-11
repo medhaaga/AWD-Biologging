@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import warnings
 import time
-import ast
+import json
 
 # Sklearn
 from sklearn.preprocessing import LabelEncoder
@@ -208,9 +208,9 @@ def create_data_tensors(acc_data, collapse_behavior_mapping, behaviors, sampling
     """
 
     # Convert stringified lists to actual lists
-    acc_data['acc_x'] = acc_data['acc_x'].apply(ast.literal_eval)
-    acc_data['acc_y'] = acc_data['acc_y'].apply(ast.literal_eval)
-    acc_data['acc_z'] = acc_data['acc_z'].apply(ast.literal_eval)
+    acc_data['acc_x'] = acc_data['acc_x'].apply(json.loads)
+    acc_data['acc_y'] = acc_data['acc_y'].apply(json.loads)
+    acc_data['acc_z'] = acc_data['acc_z'].apply(json.loads )
 
     acc_data = adjust_behavior_and_durations(acc_data, collapse_behavior_mapping, behaviors)
     acc_data.reset_index(drop=True, inplace=True)
@@ -298,9 +298,9 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, exp_name, a
     acc_data = pd.read_csv(acc_data_path)
     acc_data_metadata = pd.read_csv(acc_metadata_path)
 
-    acc_data['acc_x'] = acc_data['acc_x'].apply(ast.literal_eval)
-    acc_data['acc_y'] = acc_data['acc_y'].apply(ast.literal_eval)
-    acc_data['acc_z'] = acc_data['acc_z'].apply(ast.literal_eval)
+    acc_data['acc_x'] = acc_data['acc_x'].apply(json.loads)
+    acc_data['acc_y'] = acc_data['acc_y'].apply(json.loads)
+    acc_data['acc_z'] = acc_data['acc_z'].apply(json.loads)
 
     acc_data = adjust_behavior_and_durations(acc_data, collapse_behavior_mapping, behaviors)
     acc_data_metadata = acc_data_metadata.loc[acc_data.index]

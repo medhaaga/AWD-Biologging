@@ -55,12 +55,12 @@ def get_results_dir():
     os.makedirs(path, exist_ok=True)
     return path
 
-def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, window_duration_percentile):
+def get_results_path(exp_name, n_CNNlayers, n_channels, kernel_size, theta, seed):
     results_dir = get_results_dir()
     os.makedirs(results_dir, exist_ok=True)
     levels = ['predictions', exp_name, 'conv_layers_'+str(n_CNNlayers), \
              'n_channels_'+str(n_channels), 'kernel_size_'+str(kernel_size), \
-             'theta_'+str(theta), 'duration_'+str(window_duration_percentile)]
+             'theta_'+str(theta), 'seed_'+str(seed)]
     return get_path(levels, results_dir)
 
 def get_online_pred_path(halfday):

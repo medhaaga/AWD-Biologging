@@ -98,7 +98,7 @@ if __name__ == '__main__':
     torch.cuda.manual_seed(args.seed)
 
     # experiment directory 
-    dir = get_results_path(args.experiment_name, args.n_CNNlayers, args.n_channels, args.kernel_size, args.theta, args.window_duration_percentile)
+    dir = get_results_path(args.experiment_name, args.n_CNNlayers, args.n_channels, args.kernel_size, args.theta, args.seed)
     os.makedirs(dir, exist_ok=True)
 
     # train-test split profile

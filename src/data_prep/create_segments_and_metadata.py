@@ -164,7 +164,16 @@ def create_metadata(path_mappings, metadata_path):
     metadata = pd.DataFrame(columns = ['file path', 'individual ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]'])
 
     individuals = VECTRONICS_LOCATIONS['id'].values
-    individuals_acc_filepaths = [[os.path.join(VECTRONICS_LOCATIONS.iloc[i]['combined_acc_location'], file) for file in os.listdir(VECTRONICS_LOCATIONS.iloc[i]['combined_acc_location']) if file.endswith('csv')] for i in range(len(VECTRONICS_LOCATIONS))]
+    individuals_acc_filepaths = [
+    [
+        os.path.join(dir_path, file)
+        for file in os.listdir(dir_path)
+        if file.endswith('csv')
+    ]
+    for dir_path in VECTRONICS_LOCATIONS['combined_acc_location']
+    if os.path.isdir(dir_path)
+    ]
+    # individuals_acc_filepaths = [[os.path.join(VECTRONICS_LOCATIONS.iloc[i]['combined_acc_location'], file) for file in os.listdir(VECTRONICS_LOCATIONS.iloc[i]['combined_acc_location']) if file.endswith('csv')] for i in range(len(VECTRONICS_LOCATIONS))]
         
     # Sample data for the loop
     data = zip(individuals, individuals_acc_filepaths)

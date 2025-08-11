@@ -173,7 +173,7 @@ def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, win
 
     # load metadata for access to all half days   
     try: 
-        metadata = pd.read_csv(VECTRONICS_METADATA_PATH) 
+        metadata = pd.read_csv(metadata_path) 
     except Exception as e:
         print(f"Metadata path cannot be '{metadata_path}': {e}")
 
@@ -183,7 +183,7 @@ def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, win
 
     for _, row in tqdm(metadata.iterrows(), total = len(metadata)):
 
-        dog, half_day = row['dog ID'], row['half day [yyyy-mm-dd_am/pm]']
+        dog, half_day = row['individual ID'], row['half day [yyyy-mm-dd_am/pm]']
 
         windows = []
         half_day_acc = []
@@ -233,7 +233,7 @@ def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, win
         try:
             os.makedirs(eval_path, exist_ok=True)
         except Exception as e:
-            print(f"Eval path cannot be '{path}': {e}")
+            print(f"Eval path cannot be '{eval_path}': {e}")
         
         save_dir = os.path.join(eval_path, os.path.basename(row['file path']))
         half_day_online_evals.to_csv(save_dir, index=False)
