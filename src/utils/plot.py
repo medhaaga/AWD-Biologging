@@ -59,7 +59,7 @@ def plot_raw_time_series(X, y, save_path=None):
 
     plt.tight_layout()
     if save_path is not None:
-        plt.savefig(save_path)
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
     plt.show()
 
@@ -154,7 +154,7 @@ def multi_label_predictions(dir, label_encoder, split='test', plot_confusion=Tru
 
         plt.tight_layout()
         if plot_path:
-            plt.savefig(plot_path, format="png", bbox_inches="tight")
+            plt.savefig(plot_path, format="png", dpi=300, bbox_inches="tight")
         plt.show()
     
     if return_accuracy:
@@ -300,7 +300,7 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     if plot_dir is not None:
         if not os.path.exists(plot_dir):
             os.makedirs(plot_dir)  # Create directory if it doesn't exist
-        plt.savefig(os.path.join(plot_dir, f'window_length_{window_length}.png'), dpi=300)
+        plt.savefig(os.path.join(plot_dir, f'window_length_{window_length}.png'), dpi=300, bbox_inches='tight')
     
     plt.show()
 
