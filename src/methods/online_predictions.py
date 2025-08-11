@@ -51,7 +51,7 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
 
 def online_smoothening(scores, window_len, hop_len):
 
-    scores = scores.reshape(-1,scores.shape[-1])
+    scores = scores.reshape(-1,scores.shape[-1]) #(number of windows, number of classes)
     n_windows = 1+ (scores.shape[-1] - window_len)//hop_len
 
     online_avg = np.zeros((scores.shape[0], n_windows))

@@ -1,12 +1,11 @@
 import numpy as np
-import pandas as pd
 import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.lines import Line2D
 
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
 # Graphing Parameters
 import matplotlib as mpl
@@ -209,6 +208,7 @@ def plot_online_predictions(online_avg, window_length, hope_length, window_durat
     plt.show()
 
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+
 
 def plot_signal_and_online_predictions(time, signal, online_avg, window_length, hop_length, window_duration, label_encoder, sampling_rate=16, plot_dir=None, half_day_behaviors=None):
     """
