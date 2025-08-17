@@ -6,16 +6,16 @@ from matplotlib import gridspec
 from matplotlib.lines import Line2D
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-
+import matplotlib.dates as mdates
 # Graphing Parameters
 import matplotlib as mpl
 mpl.rcParams['lines.markersize'] = 12
 mpl.rcParams['lines.linewidth'] = 2
 mpl.rcParams['xtick.labelsize'] = 30
 mpl.rcParams['ytick.labelsize'] = 30
-mpl.rcParams["axes.labelsize"] = 40
-mpl.rcParams['legend.fontsize'] = 40
-mpl.rcParams['axes.titlesize'] = 40
+mpl.rcParams["axes.labelsize"] = 30
+mpl.rcParams['legend.fontsize'] = 30
+mpl.rcParams['axes.titlesize'] = 30
 mpl.rcParams['text.usetex'] = True
 import config as config
 
@@ -248,7 +248,7 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     y_labels = label_encoder.inverse_transform(y)
 
     # Create figure and GridSpec
-    fig = plt.figure(figsize=(15, 8))
+    fig = plt.figure(figsize=(15, 9))
     gs = gridspec.GridSpec(2, 2, width_ratios=[30, 1], height_ratios=[1, 1], wspace=0.2, hspace=0.6)
 
     # Create subplots
@@ -257,28 +257,30 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     cbar_ax = fig.add_subplot(gs[1, 1])
 
     # Plot the signal
-    ax_signal.plot(time, signal[0,0,:], label='X Signal', color='black', linewidth=.5, alpha=0.6)
+    ax_signal.plot(time, signal[0,0,:], label='X Signal', color='black', linewidth=.5, alpha=0.5)
     ax_signal.plot(time, signal[0,1,:], label='Y Signal', color='blue', linewidth=.5, alpha=0.5)
-    ax_signal.plot(time, signal[0,2,:], label='Z Signal', color='maroon', linewidth=.5, alpha=0.4)
+    ax_signal.plot(time, signal[0,2,:], label='Z Signal', color='maroon', linewidth=.5, alpha=0.5)
     ax_signal.set_xlabel('Time (h)')
     ax_signal.set_ylabel("Amplitude (g)")
-    ax_signal.set_title("Raw Signal along X axis")
-    ax_signal.xaxis.set_major_locator(MultipleLocator(1))  # 1 hour intervals
-    ax_signal.xaxis.set_major_formatter(FormatStrFormatter('%d'))  # Show as integer hours
+    ax_signal.set_title("Raw Signal")
+    ax_signal.xaxis.set_major_formatter(mdates.DateFormatter('%H'))
+    ax_signal.xaxis.set_major_locator(mdates.HourLocator(interval=2))
 
 
     # Plot behaviors
+    colors = dict(zip(config.BEHAVIORS, sns.color_palette("husl", len(config.BEHAVIORS))))
+    
     if half_day_behaviors is not None:
-        colors = dict(zip(config.BEHAVIORS, sns.color_palette("Set2", len(config.BEHAVIORS))))
         for i in range(len(half_day_behaviors)):
             behavior = half_day_behaviors.iloc[i]['behavior']
             ax_signal.axvspan(half_day_behaviors.iloc[i]['behavior_start'], 
                               half_day_behaviors.iloc[i]['behavior_end'], 
                               color=colors[behavior], 
-                              alpha=0.3)
-    legend_handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=colors[behavior], markersize=10, alpha=0.3, label=behavior)
+                              alpha=0.7)
+    
+    legend_handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=colors[behavior], markersize=10, alpha=0.7, label=behavior)
                   for behavior in label_encoder.classes_]
-    ax_signal.legend(handles=legend_handles, loc='upper right', bbox_to_anchor=(1.26, 1.14), fontsize=25)
+    ax_signal.legend(handles=legend_handles, loc='upper right', bbox_to_anchor=(1.26, 1.00), fontsize=25)
 
 
     # Plot the online predictions
@@ -293,8 +295,12 @@ def plot_signal_and_online_predictions(time, signal, online_avg, window_length, 
     cbar = plt.colorbar(scatter, cax=cbar_ax)
     cbar.set_label('Softmax Score', fontsize=25)
 
+    # Shift colorbar up so it doesn't align with the x-axis label
+    pos = cbar_ax.get_position()
+    cbar_ax.set_position([pos.x0 - 0.02, pos.y0 + 0.01, pos.width, pos.height-0.01])
+
     # Adjust layout to fit everything
-    plt.tight_layout(rect=[0, 0, 2.9, 1])  # Reduce right space for colorbar
+    plt.tight_layout()  # Reduce right space for colorbar
 
     # Save plot if plot_dir is specified
     if plot_dir is not None:

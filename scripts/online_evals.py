@@ -40,7 +40,7 @@ from src.utils.data import (adjust_behavior_and_durations)
 
 from src.utils.plot import (plot_signal_and_online_predictions)
 
-# for reproducible results, conduct online evaluations for dog jessie with seed 23. This is 
+# for reproducible results, conduct online evaluations for individual jessie with seed 23. This is 
 
 
 def parse_arguments():
@@ -54,11 +54,11 @@ def parse_arguments():
     parser.add_argument("--device", type=int, default=0)
     parser.add_argument("--experiment_name", type=str, default='no_split', choices=['no_split', 'interdog', 'interyear', 'interAMPM'])
     parser.add_argument("--kernel_size", type=int, default=5, help="size fo kernel for CNN")
-    parser.add_argument("--n_channels", type=int, default=32, help="number of output channels for the first CNN layer")
-    parser.add_argument("--n_CNNlayers", type=int, default=5, help="number of convolution layers")
-    parser.add_argument("--theta", type=float, default=0.9)
+    parser.add_argument("--n_channels", type=int, default=64, help="number of output channels for the first CNN layer")
+    parser.add_argument("--n_CNNlayers", type=int, default=3, help="number of convolution layers")
+    parser.add_argument("--theta", type=float, default=0.3)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--dog", type=str, default='jessie', choices=['jessie', 'ash', 'palus', 'green', 'fossey'])
+    parser.add_argument("--individual", type=str, default='green', choices=['jessie', 'ash', 'palus', 'green', 'fossey'])
 
 
     return parser
@@ -76,7 +76,7 @@ def halfday_online_eval(csv_path, model_dir, window_duration, window_length, smo
     return acc_data['Timestamp'].values, signal, scores, online_avg
     
 
-def random_halfday_online_eval(model_config, dog, window_duration, window_length, smoothening_config, save_objects=True, plot=True):
+def random_halfday_online_eval(model_config, individual, window_duration, window_length, smoothening_config, save_objects=True, plot=True):
     """Evaluates a model on a randomly selected half-day accelerometer file.
     
     Conducts smoothening for online eval, and optionally saves and plots the results.
@@ -84,7 +84,7 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
     Parameters:
     --------------------------
     - model_config: dict = Configuration for the model.
-    - dog: str = Identifier for the dog (used to locate accelerometer data).
+    - individual: str = Identifier for the individual (used to locate accelerometer data).
     - window_duration: float = Duration of the window used in model training.
     - smoothening_config: dict = Configuration for smoothening including window length and hop length.
     - save_objects: bool = Whether to save the signal, scores, and online average arrays to files. Default is True.
@@ -104,17 +104,16 @@ def random_halfday_online_eval(model_config, dog, window_duration, window_length
         n_channels=model_config['n_channels'], 
         kernel_size=model_config['kernel_size'], 
         theta=model_config['theta'],
-        window_duration_percentile=model_config['window_duration_percentile']
+        seed=model_config['seed']
     )
-    acc_dir = os.path.join(AWD_VECTRONICS_PATHS[dog], 'combined_acc')
+    acc_dir = os.path.join(AWD_VECTRONICS_PATHS[individual], 'combined_acc')
     matched_acc_data = pd.read_csv(get_matched_data_path())
     matched_acc_data = adjust_behavior_and_durations(matched_acc_data, COLLAPSE_BEHAVIORS_MAPPING, BEHAVIORS)
 
-    # half_day = random.choice(matched_acc_data[(matched_acc_data['dog ID'] == dog)]['half day [yyyy-mm-dd_am/pm]'].values)
-    half_day = '2022-08-04_pm'  
-    acc_file_path = os.path.join(acc_dir, dog + '_' + half_day + '.csv')
+    half_day = '2021-09-11_am'  
+    acc_file_path = os.path.join(acc_dir, individual + '_' + half_day + '.csv')
 
-    half_day_behaviors = matched_acc_data[(matched_acc_data['dog ID'] == dog) & (matched_acc_data['half day [yyyy-mm-dd_am/pm]'] == half_day)]
+    half_day_behaviors = matched_acc_data[(matched_acc_data['individual ID'] == individual) & (matched_acc_data['half day [yyyy-mm-dd_am/pm]'] == half_day)]
     half_day_behaviors.loc[:, 'behavior_start'] = pd.to_datetime(half_day_behaviors['behavior_start'])
     half_day_behaviors.loc[:, 'behavior_end'] = pd.to_datetime(half_day_behaviors['behavior_end'])
 
@@ -183,7 +182,7 @@ def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, win
 
     for _, row in tqdm(metadata.iterrows(), total = len(metadata)):
 
-        dog, half_day = row['individual ID'], row['half day [yyyy-mm-dd_am/pm]']
+        individual, half_day = row['individual ID'], row['half day [yyyy-mm-dd_am/pm]']
 
         windows = []
         half_day_acc = []
@@ -192,7 +191,7 @@ def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, win
         half_day_data['Timestamp'] = pd.to_datetime(half_day_data['Timestamp'], utc=True)
 
         if len(half_day_data) < window_length:
-            warnings.warn(f'half day {dog}-{half_day} has lesser data than window length. Skipped.')
+            warnings.warn(f'half day {individual}-{half_day} has lesser data than window length. Skipped.')
         
         start_index = 0
 
@@ -214,7 +213,7 @@ def all_online_eval(model_dir, metadata_path, device, sampling_frequency=16, win
 
         # Create DataFrame for windows
         half_day_online_evals = pd.DataFrame(windows)
-        half_day_online_evals['Dog ID'] = [dog]*len(half_day_online_evals)
+        half_day_online_evals['individual ID'] = [individual]*len(half_day_online_evals)
 
         # Convert list of arrays to a PyTorch tensor
         half_day_acc = np.array(half_day_acc).reshape(len(half_day_acc), window_length, 3)
@@ -287,7 +286,7 @@ if __name__ == '__main__':
                     'n_channels': args.n_channels,
                     'kernel_size': args.kernel_size,
                     'theta': args.theta,
-                    'window_duration_percentile': args.window_duration_percentile
+                    'seed': args.seed
                     }
 
     smoothening_config = {'smoothening_window_length': args.smoothening_window_length,
@@ -296,7 +295,7 @@ if __name__ == '__main__':
                           }
 
     random_halfday_online_eval(model_config=model_config, 
-                               dog=args.dog, 
+                               individual=args.individual, 
                                window_duration=args.window_duration, 
                                window_length=args.window_length, 
                                smoothening_config=smoothening_config, 
@@ -308,6 +307,4 @@ if __name__ == '__main__':
     # extract_eating_events()
 
 
-
-    
 

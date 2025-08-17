@@ -28,7 +28,7 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
         hop_length = window_length
 
     # check if model and window duration are compatible
-    cmodel = torch.load(os.path.join(model_dir, 'cmodel.pt'), weights_only=False).to(device)
+    cmodel = torch.load(os.path.join(model_dir, 'cmodel.pt'), weights_only=False, map_location=device)
 
     zero_signal = torch.zeros(1, 3, window_length).to(device)
     assert cmodel.model[:-2](zero_signal).shape[-1] == cmodel.model[-2].in_features, "Window duration and model not compatible"
@@ -45,13 +45,13 @@ def online_score_evaluation(model_dir, X, window_duration=None, window_length=No
         
         scores.append(outputs.float().cpu().numpy())
 
-    scores = np.array(scores).transpose(1, 2, 0) # (number of samples, number of windows, number of classes)
+    scores = np.array(scores).transpose(1, 2, 0) # (number of samples, number of classes, number of windows)
 
     return scores
 
 def online_smoothening(scores, window_len, hop_len):
 
-    scores = scores.reshape(-1,scores.shape[-1]) #(number of windows, number of classes)
+    scores = scores.reshape(-1,scores.shape[-1]) #(number of classes, number of windows)
     n_windows = 1+ (scores.shape[-1] - window_len)//hop_len
 
     online_avg = np.zeros((scores.shape[0], n_windows))
