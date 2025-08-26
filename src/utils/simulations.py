@@ -328,6 +328,7 @@ def simulate_markov_acc_day(data_constants, transition_matrix, avg_durations, ta
     annotations_df = pd.DataFrame(behavior_annotations, columns=["id", "Behavior", "Timestamp_start", "Timestamp_end", "Source"])
     return acc_df, annotations_df
 
+
 def plot_simulated_day(acc_df, plot_path=None):
     acc_df['Timestamp'] = pd.to_datetime(acc_df['Timestamp'])
 
@@ -365,18 +366,21 @@ def plot_simulated_day(acc_df, plot_path=None):
 
     # Format axis
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H'))
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Amplitude [g]')
+    ax.set_xlabel('Time (h)')
+    ax.set_ylabel('Amplitude (g)')
     # ax.set_title('24 Hours of Simulated Acceleration Signal and Behavior Annotations')
 
     # Create legends
     legend1 = ax.legend(handles=signal_handles, loc='upper left')
     ax.add_artist(legend1)  # Add first legend manually
-    ax.legend(handles=behavior_handles, loc='lower center', ncol=5, bbox_to_anchor=(0.5, -0.))
+    ax.legend(handles=behavior_handles, loc='lower center', ncol=5, bbox_to_anchor=(0.5, -0.6))
     plt.tight_layout()
+    
     if plot_path is not None:
         plt.savefig(plot_path, dpi=300)
+
     plt.show()
+    
     
 
 

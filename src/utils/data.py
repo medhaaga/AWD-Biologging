@@ -186,7 +186,7 @@ def adjust_behavior_and_durations(df, collapse_behavior_mapping, behaviors, verb
 
     return df
 
-def create_data_tensors(acc_data, collapse_behavior_mapping, behaviors, sampling_rate, 
+def create_data_tensors(acc_data, acc_metadata, collapse_behavior_mapping, behaviors, sampling_rate, 
                         padding='repeat', reuse_behaviors=[], min_duration=1.0, duration_percentile=50):
     """
     Create data tensors from acceleration data with given parameters.
@@ -213,12 +213,16 @@ def create_data_tensors(acc_data, collapse_behavior_mapping, behaviors, sampling
     acc_data['acc_z'] = acc_data['acc_z'].apply(json.loads )
 
     acc_data = adjust_behavior_and_durations(acc_data, collapse_behavior_mapping, behaviors)
+    acc_metadata = acc_metadata.loc[acc_data.index]
+
     acc_data.reset_index(drop=True, inplace=True)
+    acc_metadata.reset_index(drop=True, inplace=True)
+
     window_duration = np.percentile(acc_data['duration'].values, duration_percentile)
     print(f'Duration of window is {window_duration} sec.')
     max_steps = int(window_duration * sampling_rate)
 
-    X, y, z = create_padded_or_truncated_data(acc_data, max_steps, padding=padding, 
+    X, y, z = create_padded_or_truncated_data(df=acc_data, acc_metadata=acc_metadata, fixed_length=max_steps, padding=padding, 
                                               reuse_behaviors=reuse_behaviors, min_duration=min_duration)
     return X, y, z
 
@@ -256,8 +260,8 @@ def match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, be
     t1 = time.time()
 
     # match filtered data with annotations
-    _, df_train, _ = create_matched_data(train_filtered_metadata, all_annotations)
-    _, df_test, _ = create_matched_data(test_filtered_metadata, all_annotations)
+    _, df_train, metadata_df_train = create_matched_data(train_filtered_metadata, all_annotations)
+    _, df_test, metadata_df_test = create_matched_data(test_filtered_metadata, all_annotations)
 
     t2 = time.time()
 
@@ -268,10 +272,12 @@ def match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, be
     df_train = adjust_behavior_and_durations(df_train, collapse_behavior_mapping, behaviors)
     df_test = adjust_behavior_and_durations(df_test, collapse_behavior_mapping, behaviors)
 
-    df_train.reset_index()
-    df_test.reset_index()
+    df_train.reset_index(drop=True, inplace=True)
+    metadata_df_train.reset_index(drop=True, inplace=True)
+    df_test.reset_index(drop=True, inplace=True)
+    metadata_df_test.reset_index(drop=True, inplace=True)
 
-    return df_train, df_test
+    return df_train, metadata_df_train, df_test, metadata_df_test
 
 def load_matched_train_test_df(collapse_behavior_mapping, behaviors, exp_name, acc_data_path, acc_metadata_path, train_test_split=0.2):
 
@@ -290,28 +296,32 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, exp_name, a
     Returns
     -----------------
     df_train: pd DataFrame
+    metadata_df_train: pd DataFrame
+
     df_test: pd DataFrame
+    metadata_df_test: pd DataFrame
+
     """
 
     train_filter_profile, test_filter_profile = get_exp_filter_profiles(exp_name) 
     
     acc_data = pd.read_csv(acc_data_path)
-    acc_data_metadata = pd.read_csv(acc_metadata_path)
+    acc_metadata = pd.read_csv(acc_metadata_path)
 
     acc_data['acc_x'] = acc_data['acc_x'].apply(json.loads)
     acc_data['acc_y'] = acc_data['acc_y'].apply(json.loads)
     acc_data['acc_z'] = acc_data['acc_z'].apply(json.loads)
 
     acc_data = adjust_behavior_and_durations(acc_data, collapse_behavior_mapping, behaviors)
-    acc_data_metadata = acc_data_metadata.loc[acc_data.index]
+    acc_metadata = acc_metadata.loc[acc_data.index]
 
-    acc_data.reset_index()
-    acc_data_metadata.reset_index()
+    acc_data.reset_index(drop=True, inplace=True)
+    acc_metadata.reset_index(drop=True, inplace=True)
 
     print(f'Total number of matched annotations: {len(acc_data)}')
 
-    train_filter_idx = filter_data(acc_data_metadata, train_filter_profile)
-    test_filter_idx = filter_data(acc_data_metadata, test_filter_profile)
+    train_filter_idx = filter_data(acc_metadata, train_filter_profile)
+    test_filter_idx = filter_data(acc_metadata, test_filter_profile)
 
 
     if len(set(train_filter_idx) & set(test_filter_idx)):
@@ -323,13 +333,16 @@ def load_matched_train_test_df(collapse_behavior_mapping, behaviors, exp_name, a
         print(f'No overlaps. \nno. of train observations: {len(train_filter_idx)}, no. of test observations: {len(test_filter_idx)}')
 
 
-    df_train = acc_data.iloc[train_filter_idx]
-    df_test = acc_data.iloc[test_filter_idx]
+    df_train, metadata_df_train = acc_data.iloc[train_filter_idx], acc_metadata.iloc[train_filter_idx]
+    df_test, metadata_df_test = acc_data.iloc[test_filter_idx],  acc_metadata.iloc[test_filter_idx]
 
-    df_train.reset_index()
-    df_test.reset_index()
+    df_train.reset_index(drop=True, inplace=True)
+    metadata_df_train.reset_index(drop=True, inplace=True)
 
-    return df_train, df_test
+    df_test.reset_index(drop=True, inplace=True)
+    metadata_df_test.reset_index(drop=True, inplace=True)
+
+    return df_train, metadata_df_train, df_test, metadata_df_test
 
 
 def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping, 
@@ -364,16 +377,18 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping,
 
     t1 = time.time()
     if args.match or (acc_data_path is None) or (acc_metadata_path is None):
+        if (metadata is None) or (all_annotations is None):
+            raise FileNotFoundError("The metadata and annotations are not available.")
         print('Matching acceleration-behavior pairs...')
-        df_train, df_test = match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, behaviors, args)
+        df_train, metadata_df_train, df_test, metadata_df_test = match_train_test_df(metadata, all_annotations, collapse_behavior_mapping, behaviors, args)
     else:
         print('Using pre-matched acceleration-behavior pairs...')
-        df_train, df_test = load_matched_train_test_df(collapse_behavior_mapping=collapse_behavior_mapping, 
-                                                        behaviors=behaviors, 
-                                                        exp_name=args.experiment_name, 
-                                                        acc_data_path=acc_data_path,
-                                                        acc_metadata_path=acc_metadata_path,
-                                                        train_test_split=args.train_test_split)
+        df_train, metadata_df_train, df_test, metadata_df_test = load_matched_train_test_df(collapse_behavior_mapping=collapse_behavior_mapping, 
+                                                                                            behaviors=behaviors, 
+                                                                                            exp_name=args.experiment_name, 
+                                                                                            acc_data_path=acc_data_path,
+                                                                                            acc_metadata_path=acc_metadata_path,
+                                                                                            train_test_split=args.train_test_split)
 
     print("")
     print("==================================")
@@ -389,8 +404,8 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping,
         ValueError("Both window_duration_percentile and window_duration cannot be None in arguments.")
         
     max_steps = int(max_acc_duration*SAMPLING_RATE)
-    X, y, z = create_padded_or_truncated_data(df_train, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
-    X_test, y_test, z_test = create_padded_or_truncated_data(df_test, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
+    X, y, z = create_padded_or_truncated_data(df_train, metadata_df_train, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
+    X_test, y_test, z_test = create_padded_or_truncated_data(df_test, metadata_df_test, max_steps, padding=args.padding, reuse_behaviors=reuse_behaviors, min_duration=args.min_duration)
     print(f"Creating fixed-duration windows takes {time.time() - t2:3f} seconds.")
 
     print("")
@@ -419,7 +434,6 @@ def setup_data_objects(metadata, all_annotations, collapse_behavior_mapping,
         X_train, X_val, y_train, y_val, z_train, z_val = X[train_index], X[val_index], y[train_index], y[val_index], z.iloc[train_index], z.iloc[val_index]
 
     return X_train, y_train, z_train, X_val, y_val, z_val, X_test, y_test, z_test, label_encoder
-
 
 
 def setup_multilabel_dataloaders(X_train, y_train, X_val, y_val, X_test, y_test, args):

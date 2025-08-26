@@ -11,7 +11,7 @@ sys.path.append("../../")
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+import warnings
 import argparse
 
 # Torch
@@ -24,8 +24,7 @@ from torch.utils.data import TensorDataset, DataLoader
 
 from src.utils.train import (train_run)
 
-from src.utils.io import (format_time,
-                          get_results_path,
+from src.utils.io import (get_results_path,
                           get_metadata_path,
                           get_video_labels_path,
                           get_audio_labels_path,
@@ -41,10 +40,7 @@ from src.utils.data import (setup_data_objects,
 
 from src.data_prep.data_prep_utils import combined_annotations
 
-from config.settings import (VECTRONICS_METADATA_PATH,
-                             VECTRONICS_VIDEO_ANNOTATIONS_PATH,
-                             VECTRONICS_AUDIO_ANNOTATIONS_PATH,
-                             id_mapping,
+from config.settings import (id_mapping,
                              COLLAPSE_BEHAVIORS_MAPPING,
                              BEHAVIORS)
 
@@ -61,7 +57,7 @@ def parse_arguments():
     parser.add_argument("--experiment_name", type=str, default='no_split', choices=['no_split', 'interdog', 'interyear', 'interAMPM'])
     parser.add_argument("--kernel_size", type=int, default=5, help="size fo kernel for CNN")
     parser.add_argument("--n_channels", type=int, default=64, help="number of output channels for the first CNN layer")
-    parser.add_argument("--n_CNNlayers", type=int, default=3, help="number of convolution layers")
+    parser.add_argument("--n_CNNlayers", type=int, default=5, help="number of convolution layers")
     parser.add_argument("--window_duration_percentile", type=int, default=50, help="audio duration cutoff percentile")
     parser.add_argument("--num_epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=64)
@@ -76,7 +72,7 @@ def parse_arguments():
     parser.add_argument("--cutoff_frequency", type=float, default=0)
     parser.add_argument("--cutoff_order", type=int, default=5)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--theta", type=float, default=0.7)
+    parser.add_argument("--theta", type=float, default=0.3)
     parser.add_argument("--match", type=int, default=0, help="should the matching be done or use pre-matched observations?")
     parser.add_argument("--min_duration", type=float, default=1.0, help="minimum duration of a behavior in seconds so that it is not discarded")
     parser.add_argument("--create_class_imbalance", type=int, default=0, help="whether to create class imbalance artificially")
@@ -108,23 +104,23 @@ if __name__ == '__main__':
     # loading data and creating train/test split
     ##############################################
 
+    # only used when metadata for the fukl dataset and all annotation srae availanle,
+    # otherwise use pre-matched data saved in ~/AWD-Biologging/data from Zenodo.
+    # Remember to set args.match=0.
+    
     if os.path.exists(get_metadata_path()):
         metadata = pd.read_csv(get_metadata_path()) # load metadata
-    elif os.path.exists(VECTRONICS_METADATA_PATH):
-        metadata = pd.read_csv(VECTRONICS_METADATA_PATH) # load metadata
     else:
-        raise FileNotFoundError("The metadata not found.")
+        warnings.warn("Metadata not found.", UserWarning)
+        metadata = None
 
-    if os.path.exists(VECTRONICS_VIDEO_ANNOTATIONS_PATH) and os.path.exists(VECTRONICS_AUDIO_ANNOTATIONS_PATH):
-        all_annotations = combined_annotations(video_path=VECTRONICS_VIDEO_ANNOTATIONS_PATH, 
-                                            audio_path=VECTRONICS_AUDIO_ANNOTATIONS_PATH,
-                                            id_mapping=id_mapping) # load annotations 
-    elif os.path.exists(get_video_labels_path()) and os.path.exists(get_audio_labels_path()):
+    if os.path.exists(get_video_labels_path()) and os.path.exists(get_audio_labels_path()):
         all_annotations = combined_annotations(video_path=get_video_labels_path(), 
                                             audio_path=get_audio_labels_path(),
                                             id_mapping=id_mapping) # load annotations 
     else:
-        raise FileNotFoundError("The annottaions not found.")
+        warnings.warn("Annotations not found.", UserWarning)
+        all_annotations = None
 
 
     start = time.time()

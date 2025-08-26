@@ -226,7 +226,7 @@ def pad_or_truncate_list(lst, fixed_length):
         # Truncate the list if it's longer than fixed_length
         return lst[len(lst)-fixed_length:]
 
-def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_behaviors=[], min_duration=1.0):
+def create_padded_or_truncated_data(df, acc_metadata, fixed_length, padding='repeat', reuse_behaviors=[], min_duration=1.0):
         
     """Load the dataset and make the acc sequence along x, y, z of fixed length.
 
@@ -251,20 +251,23 @@ def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_be
 
     if len(df) == 0:
         raise ValueError('No data provided')
+    if reuse_behaviors is None:
+        reuse_behaviors = []
 
 
     df_new = pd.DataFrame(columns=['acc_x', 'acc_y', 'acc_z'])
-    df_metadata = pd.DataFrame(columns=['individual ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'Source'])
+    df_metadata = pd.DataFrame(columns=acc_metadata.columns)
     
     if padding == 'zeros':
         df_new['acc_x'] = df['acc_x'].apply(pad_or_truncate_list, args=(fixed_length,))
         df_new['acc_y'] = df['acc_y'].apply(pad_or_truncate_list, args=(fixed_length,))
         df_new['acc_z'] = df['acc_z'].apply(pad_or_truncate_list, args=(fixed_length,))
+        df_metadata = acc_metadata.copy()
         
     elif padding == 'repeat':
 
         expanded_rows = []
-        for _, row in df.iterrows():
+        for idx, row in df.iterrows():
 
             reuse = row['behavior'] in reuse_behaviors
 
@@ -276,11 +279,11 @@ def create_padded_or_truncated_data(df, fixed_length, padding='repeat', reuse_be
 
             for x, y, z in zip(acc_x_windows, acc_y_windows, acc_z_windows):
                 expanded_rows.append({'acc_x': x, 'acc_y': y, 'acc_z': z, 'behavior': row['behavior']})
-                df_metadata.loc[len(df_metadata)] = row[['individual ID', 'year', 'UTC Date [yyyy-mm-dd]', 'am/pm', 'half day [yyyy-mm-dd_am/pm]', 'avg temperature [C]', 'Source']].values
+                df_metadata.loc[len(df_metadata)] = acc_metadata.iloc[idx]
 
         df_new = pd.DataFrame(expanded_rows)
     else:
-        raise ValueError
+        raise ValueError(f"Unknown padding type: {padding}")
 
 
     arr_list = []

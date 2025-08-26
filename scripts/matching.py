@@ -1,21 +1,22 @@
 import sys
 sys.path.append('.')
+sys.path.append('../')
+sys.path.append('../../')
 
 # Data handling
 import pandas as pd
 
 # import scripts
 
-from config.settings import (VECTRONICS_METADATA_PATH, 
-                    VECTRONICS_VIDEO_ANNOTATIONS_PATH,
-                    VECTRONICS_AUDIO_ANNOTATIONS_PATH, 
-                    id_mapping
-                    )
+from config.settings import (id_mapping)
 from src.data_prep.data_prep_utils import combined_annotations
 from src.data_prep.create_matched_data_objects import create_matched_data
 from src.utils.io import (get_matched_data_path,
                                 get_matched_metadata_path,
-                                get_matched_summary_path)
+                                get_matched_summary_path,
+                                get_metadata_path,
+                                get_video_labels_path,
+                                get_audio_labels_path)
 
 def match_behaviors(metadata_path, video_annotations_path, audio_annotations_path):
     """
@@ -42,6 +43,6 @@ def match_behaviors(metadata_path, video_annotations_path, audio_annotations_pat
 
 if __name__ == '__main__':
 
-    match_behaviors(VECTRONICS_METADATA_PATH,
-                    VECTRONICS_VIDEO_ANNOTATIONS_PATH,
-                    VECTRONICS_AUDIO_ANNOTATIONS_PATH)
+    match_behaviors(get_metadata_path(),
+                    get_video_labels_path(),
+                    get_audio_labels_path())
