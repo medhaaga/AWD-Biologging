@@ -26,6 +26,9 @@ The split details for each experimental setup are:
 | Validation set size | 3745 | 3277 | 2382 | 3429 |
 | Test set size | 4645 | 6987 | 11458 | 6227 | 
 
+## Download data
+
+Download the data files from [Zenodo](https://zenodo.org/records/16890491) and save them in `./data/` folder.
 ## Training
 
 To train the classification model, including both the prediction and conformal models, for a predefined experiment setup that specifies the train and test split, use the following command:
