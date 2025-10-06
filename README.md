@@ -80,7 +80,7 @@ If you use this package in your research, please cite it as:
 
 **BibTeX:**
 ```bibtex
-@software{doe2025mycoolpackage,
+@software{agarwal2025AWD-Biologging,
   author       = {Agarwal, Medha and Rafiq, Kasim and Mehta, Ronak and Abrahms, Briana and Harchaoui, Zaid},
   title        = {AWD-Biologging},
   month        = oct,
