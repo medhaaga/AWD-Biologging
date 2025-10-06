@@ -71,3 +71,22 @@ Make sure you have [Miniconda](https://docs.anaconda.com/miniconda/miniconda-ins
 To install PyTorch with CUDA support, follow these [instructions](https://pytorch.org/) for your specific CUDA distribution.
 
 A step-by-step guide for setting up the data, generating metadata, creating train and test splits based on the metadata, creating fixed-length windows for training, training the model, and evaluating its performance is available in `quickstart.ipynb`.
+
+## How to Cite
+
+If you use this package in your research, please cite it as:
+
+> **Agarwal, M., & Rafiq, K., & Mehta, R., & Abrahms, B., & Harchaoui, Z.** (2025). *AWD-Biologging* (Version 1.0.0) [Computer software]. GitHub. [https://github.com/medhaaga/AWD-Biologging](https://github.com/medhaaga/AWD-Biologging)
+
+**BibTeX:**
+```bibtex
+@software{doe2025mycoolpackage,
+  author       = {Agarwal, Medha and Rafiq, Kasim and Mehta, Ronak and Abrahms, Briana and Harchaoui, Zaid},
+  title        = {AWD-Biologging},
+  month        = oct,
+  year         = 2025,
+  publisher    = {Zenodo},
+  version      = {1.0.0},
+  doi          = {10.5281/zenodo.1234567},
+  url          = {https://doi.org/10.5281/zenodo.1234567}
+}
