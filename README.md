@@ -76,7 +76,7 @@ A step-by-step guide for setting up the data, generating metadata, creating trai
 
 If you use this package in your research, please cite it as:
 
-> **Agarwal, M., & Rafiq, K., & Mehta, R., & Abrahms, B., & Harchaoui, Z.** (2025). *AWD-Biologging* (Version 1.0.0) [Computer software]. GitHub. [https://github.com/medhaaga/AWD-Biologging](https://github.com/medhaaga/AWD-Biologging)
+> **Agarwal, M., & Rafiq, K., & Mehta, R., & Abrahms, B., & Harchaoui, Z.** (2025). *AWD-Biologging* (Version 1.0.0) [Computer software]. Zenodo. [https://doi.org/10.5281/zenodo.17281235](https://doi.org/10.5281/zenodo.17281235)
 
 **BibTeX:**
 ```bibtex
@@ -87,6 +87,6 @@ If you use this package in your research, please cite it as:
   year         = 2025,
   publisher    = {Zenodo},
   version      = {1.0.0},
-  doi          = {10.5281/zenodo.1234567},
-  url          = {https://doi.org/10.5281/zenodo.1234567}
+  doi          = {10.5281/zenodo.17281235},
+  url          = {https://doi.org/10.5281/zenodo.17281235}
 }
